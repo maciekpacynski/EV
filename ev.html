@@ -124,7 +124,7 @@ th[aria-sort="ascending"] .arrow, th[aria-sort="descending"] .arrow { opacity: 1
 .rng label { display: flex; align-items: center; gap: 5px; }
 .rng label span { flex: none; width: 17px; font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
 .rng label input { flex: 1 1 auto; width: 0; }
-.rng input { padding: 5px 4px 5px 6px; text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
+.rng input { padding: 5px 24px 5px 6px; text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
 .unit { color: var(--muted); font-weight: 500; text-transform: none; letter-spacing: 0; }
 
 td.model { font-weight: 600; }
@@ -436,6 +436,7 @@ const COLS = [
   { k:"nr",   t:"Lp.",              type:"nr",   w:48 },
   { k:"brand",t:"Marka",            type:"text", w:120 },
   { k:"model",t:"Model",            type:"text", w:200 },
+  { k:"kraj", t:"Kraj", type:"text", w:60 },
   { k:"p",    t:"W PL OD",    type:"text", w:104 },
   { k:"c",    t:"Kat. od",     u:"zł", type:"num", w:110, fmt:"int" },
   { k:"z",    t:"Prom. od",    u:"zł", type:"num", w:110, fmt:"int" },
@@ -473,16 +474,21 @@ function fmtRange(rg, f) {
   return rg[0] === rg[1] ? fmtNum(rg[0], f) : fmtNum(rg[0], f) + "–" + fmtNum(rg[1], f);
 }
 
+const COUNTRY = {"IT": "Włochy", "FR": "Francja", "DE": "Niemcy", "CN": "Chiny", "ES": "Hiszpania", "RO": "Rumunia", "US": "USA", "JP": "Japonia", "KR": "Korea Południowa", "GB": "Wielka Brytania", "SE": "Szwecja", "CZ": "Czechy"};
+const BRAND_CC = {"Abarth": "IT", "Alfa Romeo": "IT", "Alpine": "FR", "Audi": "DE", "BMW": "DE", "BYD": "CN", "Citroën": "FR", "CUPRA": "ES", "Dacia": "RO", "Deepal": "CN", "Denza": "CN", "Dongfeng": "CN", "DS Automobiles": "FR", "Exlantix": "CN", "Fiat": "IT", "Ford": "US", "GAC / AION": "CN", "Geely": "CN", "GWM": "CN", "Honda": "JP", "Hongqi": "CN", "Hyundai": "KR", "Jaecoo": "CN", "Jeep": "US", "KGM (d. SsangYong)": "KR", "Kia": "KR", "Lancia": "IT", "Leapmotor": "CN", "Lexus": "JP", "Lotus": "GB", "Maserati": "IT", "Mazda": "JP", "Mercedes-Benz": "DE", "Mercedes-Maybach": "DE", "MG Motor": "CN", "MINI": "GB", "Nevo": "CN", "NIO": "CN", "Nissan": "JP", "Omoda": "CN", "Opel": "DE", "Peugeot": "FR", "Polestar": "SE", "Porsche": "DE", "Renault": "FR", "Seres": "CN", "Skoda": "CZ", "Skywell": "CN", "smart": "DE", "Subaru": "JP", "Suzuki": "JP", "Tesla": "US", "Toyota": "JP", "Volkswagen": "DE", "Volvo": "SE", "Voyah": "CN", "XPeng": "CN", "Zeekr": "CN"};
+
 const ROWS = R.map((x, i) => {
   const o = x.o;
   const soon = x.model.endsWith("*");
   const row = { i, soon, brand: x.brand, model: x.model, p: o.p || "", s: o.s || "", b: o.b || "", d: o.d || "" };
+  row.kraj = BRAND_CC[x.brand] || "";
+  row.krajN = COUNTRY[row.kraj] || "";
   row.pd = dispPrem(o.p);
   row.p = row.pd;
   ["c","z","l","m","k","r","a","q","h"].forEach(k => { row[k] = nrange(o[k]); });
   row.zf = false;
   if (!row.z && row.c) { row.z = row.c; row.zf = true; }
-  row.all = strip([x.brand, x.model, row.pd, o.p || "", row.s, row.b, row.d].join(" "));
+  row.all = strip([x.brand, x.model, row.kraj, row.krajN, row.pd, o.p || "", row.s, row.b, row.d].join(" "));
   return row;
 });
 
@@ -505,7 +511,7 @@ function visible() {
     for (const k in state.ft) {
       const f = strip(state.ft[k].trim());
       if (!f) continue;
-      const hay = k === "p" ? strip(r.pd + " " + r.p) : strip(r[k]);
+      const hay = k === "p" ? strip(r.pd + " " + r.p) : k === "kraj" ? strip(r.kraj + " " + r.krajN) : strip(r[k]);
       if (!hay.includes(f)) return false;
     }
     for (const k in state.fn) {
@@ -577,6 +583,7 @@ function render() {
           const name = '<a href="' + url + '" target="_blank" rel="noopener noreferrer" title="Zdjęcia: ' + esc(r.brand + " " + clean) + ' (Grafika Google)">' + esc(clean) + '</a>' + (r.soon ? '<span class="star">*</span>' : '');
           return `<td class="model${pc}">${name}</td>`;
         }
+        if (c.k === "kraj") return r.kraj ? `<td title="${esc(r.krajN)}">${esc(r.kraj)}</td>` : `<td class="empty">—</td>`;
         if (c.k === "p") return r.pd ? `<td>${esc(r.pd)}</td>` : `<td class="empty">—</td>`;
         if (c.type === "text") return r[c.k] ? `<td>${esc(r[c.k])}</td>` : `<td class="empty">—</td>`;
         const v = r[c.k];
@@ -640,7 +647,7 @@ function layout() {
     const cell = Math.ceil(w) + 22;
     if (c.k === "nr") return Math.max(cell, 40);
     const head = headWidth(c) + 36;
-    const filt = c.type === "num" ? Math.ceil(Math.max(measure(BODY_FONT, bounds(c).min, 0), measure(BODY_FONT, bounds(c).max, 0))) + 74 : 92;
+    const filt = c.type === "num" ? Math.ceil(Math.max(measure(BODY_FONT, bounds(c).min, 0), measure(BODY_FONT, bounds(c).max, 0))) + 86 : 92;
     return Math.max(cell, head, filt);
   });
   document.getElementById("cols").innerHTML = widths.map(w => `<col style="width:${w}px">`).join("");
