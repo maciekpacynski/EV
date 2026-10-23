@@ -120,8 +120,11 @@ th.num .sortbtn { flex-direction: row-reverse; text-align: right; }
 .sortbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .arrow { font-size: 11px; opacity: 0.35; }
 th[aria-sort="ascending"] .arrow, th[aria-sort="descending"] .arrow { opacity: 1; color: var(--accent); }
-.rng { display: flex; gap: 4px; }
-.rng input { padding: 5px 2px; text-align: center; font-size: 13px; }
+.rng { display: flex; flex-direction: column; gap: 4px; }
+.rng label { display: flex; align-items: center; gap: 5px; }
+.rng label span { flex: none; width: 17px; font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.rng label input { flex: 1 1 auto; width: 0; }
+.rng input { padding: 5px 4px 5px 6px; text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
 .unit { color: var(--muted); font-weight: 500; text-transform: none; letter-spacing: 0; }
 
 td.model { font-weight: 600; }
@@ -350,7 +353,6 @@ r("Renault","4 E-Tech",{l:4140,s:"B",b:"SUV (crossover)",d:"FWD",m:5,k:"40-52"})
 r("Renault","Megane E-Tech",{l:4200,s:"C",b:"Hatchback (crossover)",d:"FWD",m:5,k:60,r:450,h:220});
 r("Renault","Scenic E-Tech",{l:4470,s:"C",b:"SUV",d:"FWD",m:5,k:87,h:220});
 r("Renault","Twingo E-Tech*",{p:"2026-11",s:"A",b:"Hatchback",d:"FWD",m:4});
-r("Rolls-Royce","Spectre",{p:"2023-06",l:5475,s:"S",b:"Coupé",d:"AWD",m:4,r:520,h:585});
 r("Seres","3 EV",{s:"C",b:"SUV",m:5});
 r("Seres","5 EV",{s:"D",b:"SUV",m:5});
 r("Seres","7 EV",{s:"D",b:"SUV",m:5});
@@ -435,8 +437,8 @@ const COLS = [
   { k:"brand",t:"Marka",            type:"text", w:120 },
   { k:"model",t:"Model",            type:"text", w:200 },
   { k:"p",    t:"W PL OD",    type:"text", w:104 },
-  { k:"c",    t:"Cena kat. od",     u:"zł", type:"num", w:110, fmt:"int" },
-  { k:"z",    t:"Cena prom. od",    u:"zł", type:"num", w:110, fmt:"int" },
+  { k:"c",    t:"Kat. od",     u:"zł", type:"num", w:110, fmt:"int" },
+  { k:"z",    t:"Prom. od",    u:"zł", type:"num", w:110, fmt:"int" },
   { k:"l",    t:"Długość",          u:"mm", type:"num", w:96, fmt:"int" },
   { k:"s",    t:"Segment",          type:"text", w:84 },
   { k:"b",    t:"Typ nadwozia",     type:"text", w:150 },
@@ -534,20 +536,26 @@ function visible() {
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
 function cellClass(i) { return i < 3 ? " p" + i : ""; }
 
+function bounds(c) {
+  let lo = Infinity, hi = -Infinity;
+  ROWS.forEach(r => { const v = r[c.k]; if (v) { lo = Math.min(lo, v[0]); hi = Math.max(hi, v[1]); } });
+  if (lo !== Infinity && (c.k === "k" || c.k === "a")) lo = Math.floor(lo);
+  return lo === Infinity ? { min: "", max: "" } : { min: fmtNum(lo, c.fmt), max: fmtNum(hi, c.fmt) };
+}
 function buildHead() {
   document.getElementById("cols").innerHTML = COLS.map(c => `<col style="width:${c.w}px">`).join("");
   const r1 = COLS.map((c, i) => {
     const sortable = c.type !== "nr";
     const cls = (c.type === "num" ? "num" : "") + cellClass(i);
     if (!sortable) return `<th class="${cls}" scope="col"><div class="sortbtn" style="cursor:default">${esc(c.t)}</div></th>`;
-    const unit = c.u ? ` <span class="unit">${esc(c.u)}</span>` : "";
+    const unit = c.u ? `<br><span class="unit">${esc(c.u)}</span>` : "";
     return `<th class="${cls}" scope="col" data-k="${c.k}" aria-sort="none"><button type="button" class="sortbtn" data-sort="${c.k}"><span>${esc(c.t)}${unit}</span><span class="arrow">↕</span></button></th>`;
   }).join("");
   const r2 = COLS.map((c, i) => {
     const cls = (c.type === "num" ? "num" : "") + cellClass(i);
     if (c.type === "nr") return `<th class="${cls}"></th>`;
     if (c.type === "text") return `<th class="${cls}"><input type="search" id="f-${c.k}" data-ft="${c.k}" placeholder="szukaj" aria-label="Filtr: ${esc(c.t)}"></th>`;
-    return `<th class="${cls}"><div class="rng"><input type="number" step="any" inputmode="decimal" id="f-${c.k}-min" data-fn="${c.k}" data-b="min" placeholder="od" aria-label="${esc(c.t)} od"><input type="number" step="any" inputmode="decimal" id="f-${c.k}-max" data-fn="${c.k}" data-b="max" placeholder="do" aria-label="${esc(c.t)} do"></div></th>`;
+    return `<th class="${cls}"><div class="rng"><label><span>od</span><input type="number" step="any" inputmode="decimal" id="f-${c.k}-min" data-fn="${c.k}" data-b="min" placeholder="${bounds(c).min}" title="od (min w kolumnie)" aria-label="${esc(c.t)} od"></label><label><span>do</span><input type="number" step="any" inputmode="decimal" id="f-${c.k}-max" data-fn="${c.k}" data-b="max" placeholder="${bounds(c).max}" title="do (max w kolumnie)" aria-label="${esc(c.t)} do"></label></div></th>`;
   }).join("");
   document.getElementById("thead").innerHTML = `<tr>${r1}</tr><tr>${r2}</tr>`;
 }
@@ -606,7 +614,8 @@ function measure(font, text, ls) {
   return w;
 }
 function headWidth(c) {
-  const text = (c.t + (c.u ? " " + c.u : "")).toUpperCase();
+  if (c.u) return Math.ceil(Math.max(measure(HEAD_FONT, c.t.toUpperCase(), 0.25), measure(HEAD_FONT, c.u, 0.25)));
+  const text = c.t.toUpperCase();
   const words = text.split(" ");
   const ws = words.map(w => measure(HEAD_FONT, w, 0.25));
   const sp = measure(HEAD_FONT, " ", 0.25);
@@ -631,7 +640,7 @@ function layout() {
     const cell = Math.ceil(w) + 22;
     if (c.k === "nr") return Math.max(cell, 40);
     const head = headWidth(c) + 36;
-    const filt = c.type === "num" ? 100 : 76;
+    const filt = c.type === "num" ? Math.ceil(Math.max(measure(BODY_FONT, bounds(c).min, 0), measure(BODY_FONT, bounds(c).max, 0))) + 74 : 92;
     return Math.max(cell, head, filt);
   });
   document.getElementById("cols").innerHTML = widths.map(w => `<col style="width:${w}px">`).join("");
