@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Katalog EV Polska</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap">
+<style>
+body{margin:0}
+
+/* Layout: sticky spec-sheet table, two header rows (sort + filters), first three columns pinned on wide screens */
+:root {
+  --bg: #eceff2;
+  --surface: #ffffff;
+  --head: #e2e8ec;
+  --zebra: #f6f8f9;
+  --ink: #15212a;
+  --muted: #5a6975;
+  --line: #d3dbe1;
+  --accent: #0b7a5c;
+  --accent-soft: #d9efe8;
+  --flag: #a85a00;
+  --flag-soft: #fbead2;
+  --font-ui: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-head: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
+  --h1: 40px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e151a;
+    --surface: #151f26;
+    --head: #1c2a33;
+    --zebra: #121b21;
+    --ink: #e5ecf0;
+    --muted: #93a3ae;
+    --line: #29383f;
+    --accent: #3cc79b;
+    --accent-soft: #163a31;
+    --flag: #f0a64a;
+    --flag-soft: #3a2a12;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e151a;
+  --surface: #151f26;
+  --head: #1c2a33;
+  --zebra: #121b21;
+  --ink: #e5ecf0;
+  --muted: #93a3ae;
+  --line: #29383f;
+  --accent: #3cc79b;
+  --accent-soft: #163a31;
+  --flag: #f0a64a;
+  --flag-soft: #3a2a12;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.4;
+  padding-block: 20px 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin-bottom: 14px; }
+.top > div { min-width: 0; }
+h1 { font-family: var(--font-head); font-weight: 700; font-size: clamp(26px, 4vw, 38px); letter-spacing: 0.01em; line-height: 1.05; margin: 0 0 4px; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; max-width: 62ch; }
+.stats { display: flex; gap: 20px; font-family: var(--font-head); }
+.stat b { display: block; font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat span { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+.bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+.bar input[type="search"] { flex: 1 1 260px; min-width: 0; }
+.legend { color: var(--muted); font-size: 12.5px; }
+.legend i { font-style: normal; color: var(--flag); font-weight: 600; }
+
+input[type="search"], input[type="number"] {
+  font: inherit; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; width: 100%; min-width: 0;
+}
+input::placeholder { color: var(--muted); opacity: 0.8; }
+input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+button.reset {
+  font: inherit; font-weight: 600; color: var(--accent); background: transparent;
+  border: 1px solid var(--accent); border-radius: 4px; padding: 6px 12px; cursor: pointer;
+}
+button.reset:hover { background: var(--accent-soft); }
+
+.wrap { overflow: auto; max-height: 78vh; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; min-width: 100%; }
+th, td { padding: 7px 9px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: var(--surface); }
+tbody tr:nth-child(even) td { background: var(--zebra); }
+tbody tr:hover td { background: var(--accent-soft); }
+td.num, th.num { text-align: right; }
+td.num { font-variant-numeric: tabular-nums; }
+td.empty { color: var(--muted); opacity: 0.55; }
+
+thead th { position: sticky; z-index: 3; background: var(--head); }
+thead tr:first-child th { top: 0; height: var(--h1); padding: 0; }
+thead tr:nth-child(2) th { top: var(--h1); padding: 6px 6px; border-bottom: 2px solid var(--line); }
+.sortbtn {
+  all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  width: 100%; height: var(--h1); padding: 0 9px;
+  font-family: var(--font-head); font-weight: 600; font-size: 13px; letter-spacing: 0.02em; text-transform: uppercase;
+}
+th.num .sortbtn { flex-direction: row-reverse; }
+.sortbtn:hover { color: var(--accent); }
+.sortbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.arrow { font-size: 11px; opacity: 0.35; }
+th[aria-sort="ascending"] .arrow, th[aria-sort="descending"] .arrow { opacity: 1; color: var(--accent); }
+.rng { display: flex; gap: 4px; }
+.rng input { padding: 5px 5px; font-size: 13px; }
+.unit { color: var(--muted); font-weight: 500; text-transform: none; letter-spacing: 0; }
+
+td.model { font-weight: 600; }
+.star { color: var(--flag); font-weight: 700; }
+tr.soon td.model { box-shadow: inset 3px 0 0 var(--flag); }
+.brandcell { font-family: var(--font-head); font-weight: 600; font-size: 14.5px; }
+
+@media (min-width: 900px) {
+  .p0, .p1, .p2 { position: sticky; z-index: 2; }
+  .p0 { left: 0; } .p1 { left: 48px; } .p2 { left: 168px; box-shadow: 1px 0 0 var(--line); }
+  thead .p0, thead .p1, thead .p2 { z-index: 5; }
+}
+.none { padding: 28px; text-align: center; color: var(--muted); }
+.foot { color: var(--muted); font-size: 12.5px; margin-top: 12px; max-width: 110ch; }
+.foot p { margin: 0 0 4px; }
+@media (prefers-reduced-motion: no-preference) { button.reset { transition: background .15s; } }
+</style>
+
+</head>
+<body>
+<div class="top">
+  <div>
+    <h1>Katalog EV w Polsce</h1>
+    <p class="sub">Osobowe samochody elektryczne w salonach i zapowiedziane na początek 2027. Stan na 23.10.2026, bez busów i vanów.</p>
+  </div>
+  <div class="stats" aria-live="polite">
+    <div class="stat"><b id="cnt">0</b><span>wyników</span></div>
+    <div class="stat"><b id="cntBrands">0</b><span>marek</span></div>
+  </div>
+</div>
+
+<div class="bar">
+  <input type="search" id="q" placeholder="Szukaj w całej tabeli (marka, model, nadwozie, napęd…)" aria-label="Szukaj w całej tabeli">
+  <button class="reset" id="reset" type="button">Wyczyść filtry i sortowanie</button>
+  <span class="legend"><i>*</i> zamówienia otwarte lub premiera wkrótce</span>
+</div>
+
+<div class="wrap" id="wrap" tabindex="0" aria-label="Tabela pojazdów">
+  <table id="tbl">
+    <colgroup id="cols"></colgroup>
+    <thead id="thead"></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="foot">
+  <p>Puste pole (—) oznacza brak potwierdzonej wartości w źródłach, a nie zero. Zakres (np. 312–463) obejmuje różne wersje modelu. Zasięg to WLTP, ceny w zł brutto, długość w mm.</p>
+  <p>Cena kat. i prom. dotyczą najtańszej znalezionej wersji i mogą się różnić od cennika dealera. Wartości „do” (np. zasięg) podano jako maksimum. Filtry liczbowe pokazują modele, których zakres przecina podany przedział.</p>
+</div>
+
+<script>
+const R = [];
+function r(brand, model, o) { R.push({ brand, model, o: o || {} }); }
+
+r("Abarth","500e",{s:"A",b:"Hatchback",d:"FWD",m:4,k:42,h:155});
+r("Abarth","600e",{s:"B",b:"SUV",d:"FWD",m:5});
+r("Alfa Romeo","Junior Elettrica",{l:4173,s:"B",b:"SUV",d:"FWD",m:5,k:54,r:410,q:100,h:156});
+r("Alpine","A290",{c:169700,l:3997,s:"B",b:"Hatchback",d:"FWD",m:5,k:52,r:378,a:11,q:100,h:177});
+r("Alpine","A390",{p:"2026-04",c:298900,l:4520,s:"D",b:"SUV (fastback)",d:"AWD",m:5,k:89,r:555,a:11,q:150,h:400});
+r("Audi","Q4 e-tron",{l:4588,s:"C",b:"SUV",d:"RWD/AWD",m:5});
+r("Audi","Q4 Sportback e-tron",{l:4590,s:"C",b:"SUV (coupé)",d:"RWD/AWD",m:5});
+r("Audi","Q6 e-tron",{c:334300,l:4771,s:"D",b:"SUV",d:"RWD/AWD",m:5,k:94.9,r:641,a:11,q:260,h:306});
+r("Audi","Q6 Sportback e-tron",{s:"D",b:"SUV (coupé)",d:"RWD/AWD",m:5});
+r("Audi","SQ6 e-tron",{s:"D",b:"SUV",d:"AWD",m:5});
+r("Audi","SQ6 Sportback e-tron",{s:"D",b:"SUV (coupé)",d:"AWD",m:5});
+r("Audi","A6 e-tron",{l:4929,s:"E",b:"Sedan (liftback)",d:"RWD/AWD",m:5});
+r("Audi","A6 Avant e-tron",{l:4929,s:"E",b:"Kombi",d:"RWD/AWD",m:5});
+r("Audi","S6 e-tron",{s:"E",b:"Sedan (liftback)",d:"AWD",m:5});
+r("Audi","S6 Avant e-tron",{s:"E",b:"Kombi",d:"AWD",m:5});
+r("Audi","e-tron GT",{c:519900,l:4989,s:"F",b:"Sedan",d:"AWD",m:"4-5"});
+r("Audi","S e-tron GT",{c:600700,l:4989,s:"F",b:"Sedan",d:"AWD",m:"4-5",k:97,r:609,a:11,q:320,h:680});
+r("Audi","RS e-tron GT",{c:701800,l:4989,s:"F",b:"Sedan",d:"AWD",m:"4-5",k:97,r:598,a:11,q:320,h:857});
+r("Audi","Q8 e-tron",{l:4915,s:"E",b:"SUV",d:"AWD",m:5});
+r("Audi","A2 e-tron*",{p:"2026-09",c:175000,s:"C",b:"Hatchback",d:"RWD",m:5,k:"50-79",r:"422-644",q:"100-183",h:"170-326"});
+r("BMW","i4",{l:4783,s:"D",b:"Liftback (Gran Coupé)",d:"RWD/AWD",m:5});
+r("BMW","i5",{l:5060,s:"E",b:"Sedan",d:"RWD/AWD",m:5});
+r("BMW","i5 Touring",{l:5060,s:"E",b:"Kombi",d:"AWD",m:5});
+r("BMW","i7",{l:5391,s:"F",b:"Sedan",d:"AWD",m:5});
+r("BMW","iX",{l:4953,s:"E",b:"SUV",d:"AWD",m:5});
+r("BMW","iX1",{l:4500,s:"C",b:"SUV",d:"FWD/AWD",m:5});
+r("BMW","iX2",{l:4554,s:"C",b:"SUV (coupé)",d:"FWD/AWD",m:5});
+r("BMW","iX3 Neue Klasse",{p:"2026",c:275000,l:4782,s:"D",b:"SUV",d:"RWD/AWD",m:5,k:"79-104",r:"635-805",q:400,h:"320-469"});
+r("BMW","i3 Neue Klasse",{p:"2026-06",c:290000,s:"D",b:"Sedan",d:"AWD",m:5,k:108.7,r:906,h:469});
+r("BMW","iX5*",{p:"2027-Q1",s:"E",b:"SUV",d:"AWD",m:5,k:141,r:845,q:460});
+r("BYD","Dolphin",{l:4290,s:"C",b:"Hatchback",d:"FWD",m:5});
+r("BYD","Dolphin Surf",{c:97700,z:92900,l:3990,s:"A",b:"Hatchback",d:"FWD",m:4,k:43.2,r:322});
+r("BYD","Atto 2",{c:129900,l:4310,s:"B",b:"SUV",d:"FWD",m:5,k:"45.1-64.8",r:"312-463",h:177});
+r("BYD","Atto 3 / Atto 3 EVO",{l:4455,s:"C",b:"SUV",d:"FWD",m:5});
+r("BYD","Seal",{z:177100,l:4800,s:"D",b:"Sedan",d:"RWD/AWD",m:5,r:"402-570",h:"313-530"});
+r("BYD","Seal U",{l:4775,s:"D",b:"SUV",d:"FWD/AWD",m:5});
+r("BYD","Sealion 7",{z:187000,l:4830,s:"D",b:"SUV (coupé)",d:"RWD/AWD",m:5,k:82.5,r:502,h:"313-530"});
+r("BYD","Tang",{l:4870,s:"E",b:"SUV",d:"AWD",m:7});
+r("BYD","Han",{l:4995,s:"E",b:"Sedan",d:"AWD",m:5});
+r("Citroën","ë-C3",{c:88900,l:3998,s:"B",b:"Hatchback",d:"FWD",m:5,k:"29.4-44",r:"200-328"});
+r("Citroën","ë-C3 Aircross",{c:122800,l:4393,s:"B",b:"SUV",d:"FWD",m:"5-7",k:44,r:"304-309"});
+r("Citroën","ë-C4",{l:4360,s:"C",b:"Hatchback (crossover)",d:"FWD",m:5});
+r("Citroën","ë-C4 X",{l:4600,s:"C",b:"Fastback",d:"FWD",m:5});
+r("Citroën","ë-C5 Aircross",{l:4650,s:"C",b:"SUV",d:"FWD",m:5});
+r("CUPRA","Born",{l:4322,s:"C",b:"Hatchback",d:"RWD",m:5});
+r("CUPRA","Raval",{p:"2026-05",c:99900,s:"B",b:"Hatchback",d:"FWD",m:5});
+r("CUPRA","Tavascan",{l:4644,s:"C",b:"SUV (coupé)",d:"RWD/AWD",m:5});
+r("Dacia","Spring",{c:73500,l:3701,s:"A",b:"Hatchback",d:"FWD",m:4,k:24.3,r:"221-225",a:7,q:30,h:70});
+r("Deepal","S05",{p:"2026-05",c:169900,s:"C",b:"SUV",d:"FWD/AWD",m:5,k:68.8,r:485});
+r("Deepal","S07",{p:"2026-05",c:204900,s:"D",b:"SUV (coupé)",m:5});
+r("Denza","Z9 GT",{p:"2026-08",c:490000,s:"E",b:"Shooting brake",d:"AWD",m:5,h:"1000-1156"});
+r("Dongfeng","BOX / Nammi 01",{c:99900,s:"B",b:"Hatchback",d:"FWD",m:5,k:42.3,r:310});
+r("DS Automobiles","DS 3 E-TENSE",{l:4118,s:"B",b:"SUV",d:"FWD",m:5,k:54,h:156});
+r("DS Automobiles","DS 4 E-TENSE",{l:4415,s:"C",b:"Hatchback",d:"FWD",m:5});
+r("DS Automobiles","DS N°8",{s:"D",b:"SUV (fastback)",d:"FWD",m:5});
+r("Exlantix","ES",{p:"2026-Q1",c:329900,l:4945,s:"E",b:"Sedan (liftback)",m:5,k:100,q:290});
+r("Exlantix","ET",{p:"2026-Q1",c:349900,l:4980,s:"E",b:"SUV",m:5,k:100,q:290});
+r("Fiat","500e",{c:109900,l:3632,s:"A",b:"Hatchback",d:"FWD",m:4,k:42,r:320,h:118});
+r("Fiat","600e",{l:4171,s:"B",b:"SUV",d:"FWD",m:5,k:54,h:156});
+r("Fiat","Grande Panda Electric",{c:109000,l:3999,s:"B",b:"SUV",d:"FWD",m:5,k:44,r:320,h:113});
+r("Ford","Puma Gen-E",{l:4156,s:"B",b:"SUV",d:"FWD",m:5,k:43,r:376,h:168});
+r("Ford","Explorer EV",{l:4468,s:"C",b:"SUV",d:"RWD/AWD",m:5});
+r("Ford","Capri",{l:4634,s:"C",b:"SUV (coupé)",d:"RWD/AWD",m:5});
+r("Ford","Mustang Mach-E",{l:4713,s:"D",b:"SUV",d:"RWD/AWD",m:5});
+r("GAC / AION","AION UT",{s:"B",b:"Hatchback",d:"FWD",m:5});
+r("GAC / AION","AION V",{s:"C",b:"SUV",d:"FWD",m:5});
+r("GAC / AION","HYPTEC HT",{c:222900,s:"D",b:"SUV",m:5,k:72.7,r:445,h:244});
+r("Geely","E5 / Galaxy E5",{p:"2025",z:141000,l:4615,s:"C",b:"SUV",d:"FWD",m:5,k:60.22,r:430});
+r("GWM","Ora 5*",{p:"2026",s:"C",b:"SUV",d:"FWD",m:5,k:58.3});
+r("Honda","e:Ny1",{l:4387,s:"C",b:"SUV",d:"FWD",m:5,k:68.8,r:412,q:78,h:204});
+r("Hongqi","E-HS9",{s:"E",b:"SUV",d:"AWD",m:"6-7"});
+r("Hongqi","EH7",{s:"E",b:"Sedan",m:5});
+r("Hongqi","EHS7",{s:"E",b:"SUV",m:5});
+r("Hyundai","INSTER",{p:"2025",c:107900,z:97900,l:3825,s:"A",b:"Hatchback (crossover)",d:"FWD",m:4,k:"42-49",r:"327-370"});
+r("Hyundai","KONA Electric",{c:159900,z:141900,l:4355,s:"B",b:"SUV",d:"FWD",m:5,r:514});
+r("Hyundai","IONIQ 3",{p:"2026-09",c:119900,s:"B",b:"Hatchback",d:"FWD",m:5,k:"42.2-61",h:147});
+r("Hyundai","IONIQ 5",{c:214900,z:168900,l:4655,s:"C",b:"SUV",d:"RWD/AWD",m:5});
+r("Hyundai","IONIQ 5 N",{l:4715,s:"C",b:"SUV",d:"AWD",m:5});
+r("Hyundai","IONIQ 6",{c:189900,z:166900,l:4855,s:"D",b:"Sedan",d:"RWD/AWD",m:5});
+r("Hyundai","IONIQ 6 N",{s:"D",b:"Sedan",d:"AWD",m:5});
+r("Hyundai","IONIQ 9",{p:"2025-07",c:309900,z:299900,l:5060,s:"E",b:"SUV",d:"AWD",m:"6-7",r:600,h:"313-435"});
+r("Jaecoo","E5",{p:"2025-10",c:139900,s:"C",b:"SUV",d:"FWD",m:5,k:61,r:402,h:211});
+r("Jeep","Avenger Electric",{l:4084,s:"B",b:"SUV",d:"FWD",m:5,k:54,r:400,h:156});
+r("Jeep","Wagoneer S",{s:"E",b:"SUV",d:"AWD",m:5});
+r("KGM (d. SsangYong)","Torres EVX",{s:"D",b:"SUV",d:"FWD",m:5});
+r("KGM (d. SsangYong)","Korando e-Motion",{s:"C",b:"SUV",d:"FWD",m:5});
+r("Kia","EV2",{p:"2026",c:99900,l:4060,s:"B",b:"SUV",d:"FWD",m:5,k:"42.2-61",r:"317-453",h:146});
+r("Kia","EV3",{c:166900,l:4300,s:"B",b:"SUV",d:"FWD",m:5,r:430});
+r("Kia","EV4",{p:"2025-09",c:173900,l:4430,s:"C",b:"Hatchback",d:"FWD",m:5,k:"58.3-81.4",r:"440-612",h:204});
+r("Kia","EV4 Fastback",{p:"2025-10",c:192900,l:4730,s:"C",b:"Sedan (fastback)",d:"FWD",m:5,k:"58.3-81.4",r:"456-633",h:204});
+r("Kia","EV5",{c:200990,l:4615,s:"C",b:"SUV",d:"FWD/AWD",m:5});
+r("Kia","EV6",{c:212900,l:4695,s:"D",b:"SUV (crossover)",d:"RWD/AWD",m:5});
+r("Kia","EV6 GT",{c:316900,l:4695,s:"D",b:"SUV (crossover)",d:"AWD",m:5,h:585});
+r("Kia","EV9",{c:328200,l:5010,s:"E",b:"SUV",d:"AWD",m:"6-7"});
+r("Kia","Niro EV",{l:4420,s:"C",b:"SUV",d:"FWD",m:5,k:64.8,r:460,h:204});
+r("Lancia","Ypsilon Electric",{l:4080,s:"B",b:"Hatchback",d:"FWD",m:5,k:51,r:403,h:156});
+r("Leapmotor","T03",{c:73900,l:3620,s:"A",b:"Hatchback",d:"FWD",m:4,k:37.3,r:265,q:48,h:95});
+r("Leapmotor","B05",{p:"2026-04",c:129900,z:106900,s:"C",b:"Hatchback",d:"RWD",m:5,k:"57-67",r:482,h:218});
+r("Leapmotor","B10",{c:119900,z:109900,l:4515,s:"C",b:"SUV",m:5,r:"361-512"});
+r("Leapmotor","C10",{l:4739,s:"D",b:"SUV",d:"RWD",m:5});
+r("Lexus","UX 300e",{l:4495,s:"C",b:"SUV",d:"FWD",m:5,h:204});
+r("Lexus","RZ",{l:4805,s:"D",b:"SUV",d:"AWD",m:5});
+r("Lotus","Eletre",{l:5103,s:"E",b:"SUV",d:"AWD",m:5});
+r("Lotus","Emeya",{c:453393,l:5139,s:"F",b:"Sedan (GT)",d:"AWD",m:5});
+r("Maserati","Grecale Folgore",{l:4846,s:"D",b:"SUV",d:"AWD",m:5});
+r("Maserati","GranTurismo Folgore",{l:4959,s:"S",b:"Coupé",d:"AWD",m:4});
+r("Maserati","GranCabrio Folgore",{l:4966,s:"S",b:"Kabriolet",d:"AWD",m:4});
+r("Mazda","MX-30",{c:161000,l:4395,s:"C",b:"SUV (crossover)",d:"FWD",m:5,k:35.5,h:145});
+r("Mazda","6e",{p:"2025",c:198200,s:"D",b:"Sedan (liftback)",d:"RWD",m:5,k:68.8,r:479,q:165,h:258});
+r("Mazda","CX-6e",{p:"2026",c:206100,s:"D",b:"SUV",d:"RWD",m:5,k:74,r:484,a:11,q:200,h:258});
+r("Mercedes-Benz","EQA",{l:4463,s:"C",b:"SUV",d:"FWD/AWD",m:5});
+r("Mercedes-Benz","EQB",{l:4684,s:"C",b:"SUV",d:"FWD/AWD",m:"5-7"});
+r("Mercedes-Benz","EQE",{l:4946,s:"E",b:"Sedan (liftback)",d:"RWD/AWD",m:5});
+r("Mercedes-Benz","EQE SUV",{l:4863,s:"E",b:"SUV",d:"RWD/AWD",m:5});
+r("Mercedes-Benz","EQS",{c:499900,l:5216,s:"F",b:"Sedan (liftback)",d:"RWD/AWD",m:5});
+r("Mercedes-Benz","EQS SUV",{l:5125,s:"F",b:"SUV",d:"RWD/AWD",m:"5-7"});
+r("Mercedes-Benz","CLA Electric",{l:4723,s:"C",b:"Sedan (fastback)",d:"RWD/AWD",m:5});
+r("Mercedes-Benz","CLA Shooting Brake Electric",{l:4723,s:"C",b:"Kombi",d:"RWD/AWD",m:5});
+r("Mercedes-Benz","GLA Electric*",{p:"2026-11",c:205000,s:"C",b:"SUV",m:5,k:"58-85",r:660,h:"224-354"});
+r("Mercedes-Benz","GLC Electric",{p:"2025",c:280700,s:"D",b:"SUV",d:"RWD/AWD",m:5,k:"85-94",r:"616-672",q:330,h:"354-489"});
+r("Mercedes-Benz","GLB Electric",{p:"2026",c:248400,s:"C",b:"SUV",d:"RWD/AWD",m:"5-7",k:"58-85",r:604,h:"224-354"});
+r("Mercedes-Benz","AMG GT 4-Door Coupé Electric",{p:"2026",c:676000,s:"F",b:"Sedan (liftback)",d:"AWD",m:"4-5",q:600});
+r("Mercedes-Benz","EQG",{s:"S",b:"SUV (terenowy)",d:"AWD",m:5,h:587});
+r("Mercedes-Maybach","EQS SUV",{l:5125,s:"F",b:"SUV",d:"AWD",m:"4-5",h:658});
+r("MG Motor","MG4",{c:130900,l:4287,s:"C",b:"Hatchback",d:"RWD",m:5,k:"51-77",r:350});
+r("MG Motor","MG5 EV",{l:4544,s:"C",b:"Kombi",d:"FWD",m:5});
+r("MG Motor","MGS5 EV",{p:"2025",c:143900,l:4476,s:"C",b:"SUV",d:"FWD",m:5,k:"49-64",r:"340-480",q:150,h:"170-231"});
+r("MG Motor","MGS6 EV",{c:203900,s:"D",b:"SUV",d:"RWD/AWD",m:5});
+r("MG Motor","Cyberster",{z:267900,l:4535,s:"S",b:"Roadster",d:"RWD/AWD",m:2,k:77,r:443,h:"340-510"});
+r("MINI","Cooper Electric",{l:3858,s:"B",b:"Hatchback",d:"FWD",m:4});
+r("MINI","Aceman",{l:4080,s:"B",b:"SUV (crossover)",d:"FWD",m:5});
+r("MINI","Countryman E",{l:4433,s:"C",b:"SUV",d:"FWD/AWD",m:5});
+r("Nevo","Q05*",{p:"2027-Q1",s:"C",b:"SUV",m:5});
+r("NIO","ET5",{l:4790,s:"D",b:"Sedan",d:"AWD",m:5});
+r("NIO","ET5 Touring",{l:4790,s:"D",b:"Kombi",d:"AWD",m:5});
+r("NIO","ET7",{l:5101,s:"E",b:"Sedan",d:"AWD",m:5});
+r("NIO","EL6",{l:4850,s:"D",b:"SUV",d:"AWD",m:5});
+r("NIO","EL7",{l:4912,s:"E",b:"SUV",d:"AWD",m:5});
+r("NIO","EL8",{c:461900,s:"E",b:"SUV",d:"AWD",m:"6-7"});
+r("Nissan","Leaf",{l:4355,s:"C",b:"Hatchback (crossover)",d:"FWD",m:5,k:"52-75"});
+r("Nissan","Ariya",{l:4595,s:"D",b:"SUV",d:"FWD/AWD",m:5});
+r("Nissan","Micra EV",{s:"B",b:"Hatchback",d:"FWD",m:5});
+r("Omoda","5 EV / Omoda E5",{p:"2025",c:169900,s:"C",b:"SUV",d:"FWD",m:5,k:61,h:211});
+r("Omoda","4 EV*",{p:"2026",s:"B",b:"SUV",d:"FWD",m:5,h:211});
+r("Opel","Corsa Electric",{c:130500,l:4060,s:"B",b:"Hatchback",d:"FWD",m:5,k:51,r:354,h:156});
+r("Opel","Mokka Electric",{l:4151,s:"B",b:"SUV",d:"FWD",m:5,k:54,h:156});
+r("Opel","Frontera Electric",{c:127500,l:4385,s:"B",b:"SUV",d:"FWD",m:5,k:44,r:"305-310",h:113});
+r("Opel","Astra Electric",{l:4374,s:"C",b:"Hatchback",d:"FWD",m:5,k:54,h:156});
+r("Opel","Astra Sports Tourer Electric",{l:4642,s:"C",b:"Kombi",d:"FWD",m:5,k:54,h:156});
+r("Opel","Grandland Electric",{l:4650,s:"C",b:"SUV",d:"FWD",m:5});
+r("Peugeot","e-208",{c:129100,l:4055,s:"B",b:"Hatchback",d:"FWD",m:5,k:51,r:"350-362",h:156});
+r("Peugeot","e-2008",{l:4300,s:"B",b:"SUV",d:"FWD",m:5});
+r("Peugeot","e-308",{l:4367,s:"C",b:"Hatchback",d:"FWD",m:5});
+r("Peugeot","e-308 SW",{l:4636,s:"C",b:"Kombi",d:"FWD",m:5});
+r("Peugeot","e-408",{l:4687,s:"C",b:"SUV (fastback)",d:"FWD",m:5});
+r("Peugeot","e-3008",{l:4542,s:"C",b:"SUV (fastback)",d:"FWD",m:5});
+r("Peugeot","e-5008",{l:4641,s:"D",b:"SUV",d:"FWD",m:7});
+r("Polestar","Polestar 2",{l:4606,s:"D",b:"Liftback",d:"FWD/RWD/AWD",m:5});
+r("Polestar","Polestar 3",{l:4900,s:"E",b:"SUV",d:"AWD",m:5});
+r("Polestar","Polestar 4",{l:4839,s:"D",b:"SUV (coupé)",d:"RWD/AWD",m:5});
+r("Polestar","Polestar 5",{s:"F",b:"Sedan (GT)",d:"AWD",m:4});
+r("Porsche","Taycan",{l:4963,s:"F",b:"Sedan",d:"RWD/AWD",m:"4-5"});
+r("Porsche","Macan Electric",{l:4784,s:"D",b:"SUV",d:"AWD",m:5});
+r("Porsche","Cayenne Electric",{l:4985,s:"E",b:"SUV",d:"AWD",m:5});
+r("Porsche","Cayenne Coupé Electric",{s:"E",b:"SUV (coupé)",d:"AWD",m:5});
+r("Renault","5 E-Tech",{c:121500,l:3922,s:"B",b:"Hatchback",d:"FWD",m:5,k:"40-52",r:"312-410",h:"120-150"});
+r("Renault","4 E-Tech",{l:4140,s:"B",b:"SUV (crossover)",d:"FWD",m:5,k:"40-52"});
+r("Renault","Megane E-Tech",{l:4200,s:"C",b:"Hatchback (crossover)",d:"FWD",m:5,k:60,r:450,h:220});
+r("Renault","Scenic E-Tech",{l:4470,s:"C",b:"SUV",d:"FWD",m:5,k:87,h:220});
+r("Renault","Twingo E-Tech*",{p:"2026-11",s:"A",b:"Hatchback",d:"FWD",m:4});
+r("Rolls-Royce","Spectre",{p:"2023-06",l:5475,s:"S",b:"Coupé",d:"AWD",m:4,r:520,h:585});
+r("Seres","3 EV",{s:"C",b:"SUV",m:5});
+r("Seres","5 EV",{s:"D",b:"SUV",m:5});
+r("Seres","7 EV",{s:"D",b:"SUV",m:5});
+r("Seres","9 EV",{});
+r("Seres","GT EV",{});
+r("Skoda","Elroq",{l:4488,s:"C",b:"SUV",d:"RWD/AWD",m:5});
+r("Skoda","Enyaq",{l:4655,s:"D",b:"SUV",d:"RWD/AWD",m:5});
+r("Skoda","Enyaq Coupe",{l:4653,s:"D",b:"SUV (coupé)",d:"RWD/AWD",m:5});
+r("Skoda","Epiq*",{p:"2026-10",c:112900,l:4100,s:"B",b:"SUV",d:"FWD",m:5,r:425});
+r("Skoda","Peaq*",{p:"2026-09",c:204900,l:4900,s:"E",b:"SUV",d:"RWD/AWD",m:"5-7",k:"63-91",r:"440-640",h:"204-299"});
+r("Skywell","ET5 / BE11",{l:4700,s:"D",b:"SUV",d:"FWD",m:5,k:72,r:520,h:204});
+r("smart","#1",{});
+r("smart","#3",{});
+r("Subaru","Solterra",{l:4690,s:"C",b:"SUV",d:"AWD",m:5});
+r("Subaru","Uncharted",{p:"2026",l:4500,s:"C",b:"SUV (coupé)",d:"FWD/AWD",m:5,k:57.7});
+r("Subaru","E-Outback",{p:"2026",s:"D",b:"SUV (kombi)",d:"AWD",m:5,k:74.7,h:375});
+r("Suzuki","e Vitara",{l:4275,s:"B",b:"SUV",d:"FWD/AWD",m:5,k:"49-61",h:"144-184"});
+r("Tesla","Model 3",{c:174990,l:4720,s:"D",b:"Sedan",d:"RWD/AWD",m:5});
+r("Tesla","Model Y",{c:189990,l:4751,s:"D",b:"SUV",d:"RWD/AWD",m:5,r:525});
+r("Toyota","Urban Cruiser EV",{l:4285,s:"B",b:"SUV",d:"FWD/AWD",m:5});
+r("Toyota","C-HR+",{l:4520,s:"C",b:"SUV (coupé)",d:"FWD/AWD",m:5,k:"57.7-77"});
+r("Toyota","bZ4X",{l:4690,s:"C",b:"SUV",d:"FWD/AWD",m:5});
+r("Toyota","bZ4X Touring",{l:4830,s:"C",b:"Kombi",d:"FWD/AWD",m:5});
+r("Volkswagen","ID. Polo",{p:"2026-05",c:99990,l:3990,s:"B",b:"Hatchback",d:"FWD",m:5,r:329});
+r("Volkswagen","ID.3 / ID.3 Neo",{c:119690,l:4261,s:"C",b:"Hatchback",d:"RWD",m:5});
+r("Volkswagen","ID.4",{c:123390,l:4584,s:"C",b:"SUV",d:"RWD/AWD",m:5});
+r("Volkswagen","ID.5",{c:129090,l:4582,s:"C",b:"SUV (coupé)",d:"RWD/AWD",m:5});
+r("Volkswagen","ID.7",{c:182690,z:157890,l:4961,s:"D",b:"Sedan (liftback)",d:"RWD/AWD",m:5});
+r("Volkswagen","ID.7 Tourer",{l:4961,s:"D",b:"Kombi",d:"RWD/AWD",m:5});
+r("Volkswagen","ID. Cross*",{p:"2026",l:4161,s:"B",b:"SUV",d:"FWD",m:5,r:420});
+r("Volkswagen","ID. Tiguan*",{p:"2027-Q1",s:"C",b:"SUV",d:"RWD/AWD",m:5,h:300});
+r("Volvo","EX30",{l:4233,s:"B",b:"SUV",d:"RWD/AWD",m:5});
+r("Volvo","EX40",{l:4440,s:"C",b:"SUV",d:"FWD/AWD",m:5});
+r("Volvo","EC40",{l:4440,s:"C",b:"SUV (coupé)",d:"FWD/AWD",m:5});
+r("Volvo","EX60*",{p:"2026",c:281900,l:4803,s:"D",b:"SUV",d:"RWD/AWD",m:5,k:"83-117",r:"611-810",q:"320-350",h:"374-680"});
+r("Volvo","EX90",{l:5037,s:"E",b:"SUV",d:"AWD",m:7});
+r("Volvo","ES90",{l:4999,s:"E",b:"Sedan",d:"RWD/AWD",m:5});
+r("Voyah","Free",{s:"D",b:"SUV",m:5});
+r("Voyah","Courage",{s:"D",b:"SUV (terenowy)",d:"AWD",m:5});
+r("XPeng","G6",{p:"2025-04",c:203900,l:4753,s:"C",b:"SUV (coupé)",d:"RWD/AWD",m:5,k:87.5,r:570,h:476});
+r("XPeng","G9",{p:"2025-04",c:252900,l:4891,s:"E",b:"SUV",d:"RWD/AWD",m:5,k:78.2,r:460,q:260,h:313});
+r("XPeng","P7",{p:"2025-04",s:"D",b:"Sedan (fastback)",d:"RWD/AWD",m:5,r:"505-576"});
+r("XPeng","P7+",{p:"2026-01",c:197900,l:5071,s:"E",b:"Sedan (fastback)",d:"RWD/AWD",m:5,k:74.9,h:503});
+r("Zeekr","X*",{p:"2026",s:"C",b:"SUV",d:"RWD/AWD",m:5});
+r("Zeekr","001*",{p:"2026",s:"E",b:"Shooting brake",d:"RWD/AWD",m:5});
+r("Zeekr","7X*",{p:"2026",l:4688,s:"D",b:"SUV",d:"RWD/AWD",m:5});
+r("Zeekr","7GT*",{p:"2026",s:"D",b:"Shooting brake",d:"RWD/AWD",m:5});
+
+/* ---- column model ---- */
+const COLS = [
+  { k:"nr",   t:"Lp.",              type:"nr",   w:48 },
+  { k:"brand",t:"Marka",            type:"text", w:120 },
+  { k:"model",t:"Model",            type:"text", w:220 },
+  { k:"p",    t:"Premiera w PL",    type:"text", w:130 },
+  { k:"c",    t:"Cena kat. od",     u:"zł", type:"num", w:122, fmt:"int" },
+  { k:"z",    t:"Cena prom. od",    u:"zł", type:"num", w:122, fmt:"int" },
+  { k:"l",    t:"Długość",          u:"mm", type:"num", w:110, fmt:"int" },
+  { k:"s",    t:"Segment",          type:"text", w:100 },
+  { k:"b",    t:"Typ nadwozia",     type:"text", w:170 },
+  { k:"d",    t:"Napęd",            type:"text", w:120 },
+  { k:"m",    t:"Miejsca",          type:"num", w:100, fmt:"int" },
+  { k:"k",    t:"Bateria",          u:"kWh", type:"num", w:118, fmt:"dec" },
+  { k:"r",    t:"Zasięg",           u:"km",  type:"num", w:118, fmt:"int" },
+  { k:"a",    t:"Ładowanie AC",     u:"kW",  type:"num", w:112, fmt:"dec" },
+  { k:"q",    t:"Ładowanie DC",     u:"kW",  type:"num", w:112, fmt:"dec" },
+  { k:"h",    t:"Moc",              u:"KM",  type:"num", w:116, fmt:"int" }
+];
+
+const strip = s => String(s).toLowerCase().replace(/ł/g,"l").normalize("NFD").replace(/[̀-ͯ]/g,"");
+function nrange(v) {
+  if (v === undefined || v === null || v === "") return null;
+  if (typeof v === "number") return [v, v];
+  const p = String(v).split("-").map(Number);
+  return p.length === 2 ? [p[0], p[1]] : [p[0], p[0]];
+}
+function dispPrem(p) {
+  if (!p) return "";
+  let m;
+  if ((m = /^(\d{4})-(\d{2})$/.exec(p))) return m[2] + "." + m[1];
+  if ((m = /^(\d{4})-Q(\d)$/.exec(p))) return "Q" + m[2] + " " + m[1];
+  return p;
+}
+const nf = new Intl.NumberFormat("pl-PL");
+function fmtNum(n, f) {
+  if (f === "int") return nf.format(n);
+  return String(n).replace(".", ",");
+}
+function fmtRange(rg, f) {
+  if (!rg) return "";
+  return rg[0] === rg[1] ? fmtNum(rg[0], f) : fmtNum(rg[0], f) + "–" + fmtNum(rg[1], f);
+}
+
+const ROWS = R.map((x, i) => {
+  const o = x.o;
+  const soon = x.model.endsWith("*");
+  const row = { i, soon, brand: x.brand, model: x.model, p: o.p || "", s: o.s || "", b: o.b || "", d: o.d || "" };
+  row.pd = dispPrem(o.p);
+  ["c","z","l","m","k","r","a","q","h"].forEach(k => { row[k] = nrange(o[k]); });
+  row.all = strip([x.brand, x.model, row.pd, o.p || "", row.s, row.b, row.d].join(" "));
+  return row;
+});
+
+/* ---- state ---- */
+const state = { sort: null, dir: 1, q: "", ft: {}, fn: {} };
+
+function cmp(a, b, col) {
+  if (col.type === "text") {
+    const A = col.k === "p" ? a.p : a[col.k];
+    const B = col.k === "p" ? b.p : b[col.k];
+    return String(A).localeCompare(String(B), "pl", { numeric: true, sensitivity: "base" });
+  }
+  const A = a[col.k], B = b[col.k];
+  return (A[0] - B[0]) || (A[1] - B[1]);
+}
+function visible() {
+  const q = strip(state.q.trim());
+  let out = ROWS.filter(r => {
+    if (q && !q.split(/\s+/).every(w => r.all.includes(w))) return false;
+    for (const k in state.ft) {
+      const f = strip(state.ft[k].trim());
+      if (!f) continue;
+      const hay = k === "p" ? strip(r.pd + " " + r.p) : strip(r[k]);
+      if (!hay.includes(f)) return false;
+    }
+    for (const k in state.fn) {
+      const { min, max } = state.fn[k];
+      if (min === null && max === null) continue;
+      const v = r[k];
+      if (!v) return false;
+      if (min !== null && v[1] < min) return false;
+      if (max !== null && v[0] > max) return false;
+    }
+    return true;
+  });
+  if (state.sort) {
+    const col = COLS.find(c => c.k === state.sort);
+    const dir = state.dir;
+    const isNum = col.type === "num";
+    const empty = r => (isNum ? !r[col.k] : !(col.k === "p" ? r.p : r[col.k]));
+    out = out.slice().sort((a, b) => {
+      const ea = empty(a), eb = empty(b);
+      if (ea || eb) return ea === eb ? a.i - b.i : ea ? 1 : -1;
+      return cmp(a, b, col) * dir || a.i - b.i;
+    });
+  }
+  return out;
+}
+
+/* ---- render ---- */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+function cellClass(i) { return i < 3 ? " p" + i : ""; }
+
+function buildHead() {
+  document.getElementById("cols").innerHTML = COLS.map(c => `<col style="width:${c.w}px">`).join("");
+  const r1 = COLS.map((c, i) => {
+    const sortable = c.type !== "nr";
+    const cls = (c.type === "num" ? "num" : "") + cellClass(i);
+    if (!sortable) return `<th class="${cls}" scope="col"><div class="sortbtn" style="cursor:default">${esc(c.t)}</div></th>`;
+    const unit = c.u ? ` <span class="unit">${esc(c.u)}</span>` : "";
+    return `<th class="${cls}" scope="col" data-k="${c.k}" aria-sort="none"><button type="button" class="sortbtn" data-sort="${c.k}"><span>${esc(c.t)}${unit}</span><span class="arrow">↕</span></button></th>`;
+  }).join("");
+  const r2 = COLS.map((c, i) => {
+    const cls = (c.type === "num" ? "num" : "") + cellClass(i);
+    if (c.type === "nr") return `<th class="${cls}"></th>`;
+    if (c.type === "text") return `<th class="${cls}"><input type="search" id="f-${c.k}" data-ft="${c.k}" placeholder="szukaj" aria-label="Filtr: ${esc(c.t)}"></th>`;
+    return `<th class="${cls}"><div class="rng"><input type="number" step="any" inputmode="decimal" id="f-${c.k}-min" data-fn="${c.k}" data-b="min" placeholder="od" aria-label="${esc(c.t)} od"><input type="number" step="any" inputmode="decimal" id="f-${c.k}-max" data-fn="${c.k}" data-b="max" placeholder="do" aria-label="${esc(c.t)} do"></div></th>`;
+  }).join("");
+  document.getElementById("thead").innerHTML = `<tr>${r1}</tr><tr>${r2}</tr>`;
+}
+
+function render() {
+  const rows = visible();
+  const tb = document.getElementById("tbody");
+  if (!rows.length) {
+    tb.innerHTML = `<tr><td colspan="${COLS.length}" class="none">Brak pojazdów dla tych filtrów.</td></tr>`;
+  } else {
+    tb.innerHTML = rows.map((r, n) => {
+      const tds = COLS.map((c, i) => {
+        const pc = cellClass(i);
+        if (c.k === "nr") return `<td class="num${pc}">${n + 1}</td>`;
+        if (c.k === "brand") return `<td class="brandcell${pc}">${esc(r.brand)}</td>`;
+        if (c.k === "model") {
+          const name = r.soon ? esc(r.model.slice(0, -1)) + '<span class="star">*</span>' : esc(r.model);
+          return `<td class="model${pc}" title="${esc(r.model)}">${name}</td>`;
+        }
+        if (c.k === "p") return r.pd ? `<td>${esc(r.pd)}</td>` : `<td class="empty">—</td>`;
+        if (c.type === "text") return r[c.k] ? `<td>${esc(r[c.k])}</td>` : `<td class="empty">—</td>`;
+        const v = r[c.k];
+        return v ? `<td class="num">${fmtRange(v, c.fmt)}</td>` : `<td class="num empty">—</td>`;
+      }).join("");
+      return `<tr class="${r.soon ? "soon" : ""}">${tds}</tr>`;
+    }).join("");
+  }
+  document.getElementById("cnt").textContent = rows.length;
+  document.getElementById("cntBrands").textContent = new Set(rows.map(r => r.brand)).size;
+  document.querySelectorAll("#thead th[data-k]").forEach(th => {
+    const k = th.dataset.k;
+    const on = state.sort === k;
+    th.setAttribute("aria-sort", on ? (state.dir === 1 ? "ascending" : "descending") : "none");
+    th.querySelector(".arrow").textContent = on ? (state.dir === 1 ? "▲" : "▼") : "↕";
+  });
+}
+
+/* ---- events ---- */
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+const rerender = debounce(render, 90);
+
+buildHead();
+document.getElementById("thead").addEventListener("click", e => {
+  const b = e.target.closest("[data-sort]");
+  if (!b) return;
+  const k = b.dataset.sort;
+  if (state.sort !== k) { state.sort = k; state.dir = 1; }
+  else if (state.dir === 1) { state.dir = -1; }
+  else { state.sort = null; state.dir = 1; }
+  render();
+});
+document.getElementById("thead").addEventListener("input", e => {
+  const t = e.target;
+  if (t.dataset.ft) { state.ft[t.dataset.ft] = t.value; }
+  else if (t.dataset.fn) {
+    const k = t.dataset.fn;
+    state.fn[k] = state.fn[k] || { min: null, max: null };
+    const v = t.value.trim() === "" ? null : parseFloat(t.value.replace(",", "."));
+    state.fn[k][t.dataset.b] = Number.isNaN(v) ? null : v;
+  }
+  rerender();
+});
+document.getElementById("q").addEventListener("input", e => { state.q = e.target.value; rerender(); });
+document.getElementById("reset").addEventListener("click", () => {
+  state.sort = null; state.dir = 1; state.q = ""; state.ft = {}; state.fn = {};
+  document.getElementById("q").value = "";
+  document.querySelectorAll("#thead input").forEach(i => { i.value = ""; });
+  render();
+});
+render();
+</script>
+</body>
+</html>
