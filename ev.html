@@ -25,7 +25,7 @@ body{margin:0}
   --flag-soft: #fbead2;
   --font-ui: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-head: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
-  --h1: 54px;
+  --h1: 46px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -96,7 +96,7 @@ button.reset {
 button.reset:hover { background: var(--accent-soft); }
 
 .wrap { overflow: auto; max-height: 78vh; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
-table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; min-width: 100%; }
+table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; }
 th, td { padding: 7px 9px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: var(--surface); }
 tbody tr:nth-child(even) td { background: var(--zebra); }
 tbody tr:hover td { background: var(--accent-soft); }
@@ -109,18 +109,19 @@ thead th { position: sticky; z-index: 3; background: var(--head); }
 thead tr:first-child th { top: 0; height: var(--h1); padding: 0; }
 thead tr:nth-child(2) th { top: var(--h1); padding: 6px 6px; border-bottom: 2px solid var(--line); }
 .sortbtn {
-  all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 6px;
-  width: 100%; height: var(--h1); padding: 0 8px;
+  all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; gap: 6px;
+  width: 100%; height: var(--h1); padding: 7px 8px 0;
   font-family: var(--font-head); font-weight: 600; font-size: 12.5px; line-height: 1.15; letter-spacing: 0.02em; text-transform: uppercase; white-space: normal; text-align: left;
 }
 th.num .sortbtn { flex-direction: row-reverse; text-align: right; }
-.sortbtn > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.sortbtn > span:first-child { min-width: 0; }
+.arrow { line-height: 1.15; }
 .sortbtn:hover { color: var(--accent); }
 .sortbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .arrow { font-size: 11px; opacity: 0.35; }
 th[aria-sort="ascending"] .arrow, th[aria-sort="descending"] .arrow { opacity: 1; color: var(--accent); }
 .rng { display: flex; gap: 4px; }
-.rng input { padding: 5px 3px; font-size: 13px; }
+.rng input { padding: 5px 2px; text-align: center; font-size: 13px; }
 .unit { color: var(--muted); font-weight: 500; text-transform: none; letter-spacing: 0; }
 
 td.model { font-weight: 600; }
@@ -133,7 +134,7 @@ tr.soon td.model { box-shadow: inset 3px 0 0 var(--flag); }
 
 @media (min-width: 900px) {
   .p0, .p1, .p2 { position: sticky; z-index: 2; }
-  .p0 { left: 0; } .p1 { left: 48px; } .p2 { left: 168px; box-shadow: 1px 0 0 var(--line); }
+  .p0 { left: 0; } .p1 { left: var(--l1, 48px); } .p2 { left: var(--l2, 168px); box-shadow: 1px 0 0 var(--line); }
   thead .p0, thead .p1, thead .p2 { z-index: 5; }
 }
 .none { padding: 28px; text-align: center; color: var(--muted); }
@@ -433,7 +434,7 @@ const COLS = [
   { k:"nr",   t:"Lp.",              type:"nr",   w:48 },
   { k:"brand",t:"Marka",            type:"text", w:120 },
   { k:"model",t:"Model",            type:"text", w:200 },
-  { k:"p",    t:"Premiera w PL",    type:"text", w:104 },
+  { k:"p",    t:"W PL OD",    type:"text", w:104 },
   { k:"c",    t:"Cena kat. od",     u:"zł", type:"num", w:110, fmt:"int" },
   { k:"z",    t:"Cena prom. od",    u:"zł", type:"num", w:110, fmt:"int" },
   { k:"l",    t:"Długość",          u:"mm", type:"num", w:96, fmt:"int" },
@@ -443,8 +444,8 @@ const COLS = [
   { k:"m",    t:"Miejsca",          type:"num", w:76, fmt:"int" },
   { k:"k",    t:"Bateria",          u:"kWh", type:"num", w:84, fmt:"dec" },
   { k:"r",    t:"Zasięg",           u:"km",  type:"num", w:84, fmt:"int" },
-  { k:"a",    t:"Ładowanie AC",     u:"kW",  type:"num", w:80, fmt:"dec" },
-  { k:"q",    t:"Ładowanie DC",     u:"kW",  type:"num", w:80, fmt:"dec" },
+  { k:"a",    t:"MAX AC",     u:"kW",  type:"num", w:80, fmt:"dec" },
+  { k:"q",    t:"MAX DC",     u:"kW",  type:"num", w:80, fmt:"dec" },
   { k:"h",    t:"Moc",              u:"KM",  type:"num", w:80, fmt:"int" }
 ];
 
@@ -539,7 +540,7 @@ function buildHead() {
     const sortable = c.type !== "nr";
     const cls = (c.type === "num" ? "num" : "") + cellClass(i);
     if (!sortable) return `<th class="${cls}" scope="col"><div class="sortbtn" style="cursor:default">${esc(c.t)}</div></th>`;
-    const unit = c.u ? `<br><span class="unit">${esc(c.u)}</span>` : "";
+    const unit = c.u ? ` <span class="unit">${esc(c.u)}</span>` : "";
     return `<th class="${cls}" scope="col" data-k="${c.k}" aria-sort="none"><button type="button" class="sortbtn" data-sort="${c.k}"><span>${esc(c.t)}${unit}</span><span class="arrow">↕</span></button></th>`;
   }).join("");
   const r2 = COLS.map((c, i) => {
@@ -591,7 +592,58 @@ function render() {
 function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 const rerender = debounce(render, 90);
 
+
+/* ---- auto column widths: najdłuższy wpis albo nagłówek (2 wiersze) ---- */
+const HEAD_FONT = '600 12.5px "Barlow Semi Condensed", "Barlow", system-ui, sans-serif';
+const BODY_FONT = '400 14px "Barlow", system-ui, sans-serif';
+function measure(font, text, ls) {
+  const c = measure.c || (measure.c = document.createElement("canvas").getContext("2d"));
+  c.font = font;
+  const native = "letterSpacing" in c;
+  if (native) c.letterSpacing = (ls || 0) + "px";
+  let w = c.measureText(text).width;
+  if (!native) w += text.length * (ls || 0);
+  return w;
+}
+function headWidth(c) {
+  const text = (c.t + (c.u ? " " + c.u : "")).toUpperCase();
+  const words = text.split(" ");
+  const ws = words.map(w => measure(HEAD_FONT, w, 0.25));
+  const sp = measure(HEAD_FONT, " ", 0.25);
+  let w = Math.max(...ws);
+  const full = ws.reduce((a, b) => a + b, 0) + sp * (words.length - 1);
+  for (; w < full; w++) {
+    let lines = 1, cur = 0;
+    ws.forEach((x, i) => { if (cur && cur + sp + x > w) { lines++; cur = x; } else { cur = cur ? cur + sp + x : x; } });
+    if (lines <= 2) break;
+  }
+  return Math.ceil(w);
+}
+function layout() {
+  const widths = COLS.map((c, i) => {
+    let font = BODY_FONT, w = 0;
+    const test = t => { w = Math.max(w, measure(font, t, 0)); };
+    if (c.k === "nr") test(String(ROWS.length));
+    else if (c.k === "brand") { font = '600 14.5px "Barlow Semi Condensed", "Barlow", system-ui, sans-serif'; ROWS.forEach(r => test(r.brand)); }
+    else if (c.k === "model") { font = '600 14px "Barlow", system-ui, sans-serif'; ROWS.forEach(r => test(r.model)); }
+    else if (c.type === "text") ROWS.forEach(r => { const v = c.k === "p" ? r.pd : r[c.k]; if (v) test(v); });
+    else ROWS.forEach(r => { const v = r[c.k]; if (v) test(fmtRange(v, c.fmt)); });
+    const cell = Math.ceil(w) + 22;
+    if (c.k === "nr") return Math.max(cell, 40);
+    const head = headWidth(c) + 36;
+    const filt = c.type === "num" ? 100 : 76;
+    return Math.max(cell, head, filt);
+  });
+  document.getElementById("cols").innerHTML = widths.map(w => `<col style="width:${w}px">`).join("");
+  const tbl = document.getElementById("tbl");
+  tbl.style.width = widths.reduce((a, b) => a + b, 0) + "px";
+  tbl.style.setProperty("--l1", widths[0] + "px");
+  tbl.style.setProperty("--l2", (widths[0] + widths[1]) + "px");
+}
+
 buildHead();
+layout();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
 document.getElementById("thead").addEventListener("click", e => {
   const b = e.target.closest("[data-sort]");
   if (!b) return;
