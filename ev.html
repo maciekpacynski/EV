@@ -22,6 +22,8 @@ body{margin:0}
   --accent: #0b7a5c;
   --accent-soft: #d9efe8;
   --flag: #a85a00;
+  --danger: #d11a2a;
+  --danger-soft: rgba(209,26,42,.12);
   --flag-soft: #fbead2;
   --font-ui: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-head: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
@@ -39,6 +41,8 @@ body{margin:0}
     --accent: #3cc79b;
     --accent-soft: #163a31;
     --flag: #f0a64a;
+  --danger: #ff5a64;
+  --danger-soft: rgba(255,90,100,.18);
     --flag-soft: #3a2a12;
     color-scheme: dark;
   }
@@ -54,6 +58,8 @@ body{margin:0}
   --accent: #3cc79b;
   --accent-soft: #163a31;
   --flag: #f0a64a;
+  --danger: #ff5a64;
+  --danger-soft: rgba(255,90,100,.18);
   --flag-soft: #3a2a12;
   color-scheme: dark;
 }
@@ -69,16 +75,20 @@ body {
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
+.page { width: fit-content; max-width: 100%; min-width: min(100%, 700px); }
 .top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin-bottom: 14px; }
 .top > div { min-width: 0; }
+.ttl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.ttl h1 { margin: 0; text-wrap: nowrap; }
+.ttl .sub { flex: 1 1 260px; max-width: 62ch; align-self: center; }
+.logo { flex: none; display: block; }
 h1 { font-family: var(--font-head); font-weight: 700; font-size: clamp(26px, 4vw, 38px); letter-spacing: 0.01em; line-height: 1.05; margin: 0 0 4px; text-wrap: balance; }
 .sub { color: var(--muted); margin: 0; max-width: 62ch; }
-.stats { display: flex; gap: 20px; font-family: var(--font-head); }
-.stat b { display: block; font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; }
-.stat span { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+.stats { display: flex; gap: 16px; align-items: baseline; margin-left: 6px; font-family: var(--font-head); color: var(--muted); font-size: 15px; white-space: nowrap; }
+.stat b { color: var(--ink); font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; margin-right: 2px; }
 
 .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
-.bar input[type="search"] { flex: 1 1 260px; min-width: 0; }
+.bar input[type="search"] { flex: 0 1 380px; min-width: 0; }
 .legend { color: var(--muted); font-size: 12.5px; }
 .fbleg { color: var(--muted); font-style: italic; }
 .legend i { font-style: normal; color: var(--flag); font-weight: 600; }
@@ -121,8 +131,8 @@ th.num .sortbtn { flex-direction: row-reverse; text-align: right; }
 .arrow { font-size: 11px; opacity: 0.35; }
 th[aria-sort="ascending"] .arrow, th[aria-sort="descending"] .arrow { opacity: 1; color: var(--accent); }
 .rng { display: flex; flex-direction: column; gap: 4px; }
-.rng label { display: flex; align-items: center; gap: 5px; }
-.rng label span { flex: none; width: 17px; font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.rng label { display: flex; align-items: center; gap: 4px; }
+.rng label span { flex: none; width: 15px; font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
 .rng .nbox { position: relative; flex: 1 1 auto; width: 0; min-width: 0; display: flex; }
 .rng .nbox input { width: 100%; padding-right: 24px; }
 .rng input[type=number]::-webkit-inner-spin-button, .rng input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -132,16 +142,16 @@ th[aria-sort="ascending"] .arrow, th[aria-sort="descending"] .arrow { opacity: 1
 .stp button:hover { color: var(--accent); background: var(--accent-soft); }
 .stp button:focus-visible { outline: 2px solid var(--accent); }
 .rng input { padding: 5px 24px 5px 6px; text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
-.rng .nbox input { padding-right: 40px; }
-.clr, .msx { position: absolute; border: 0; background: transparent; color: var(--muted); cursor: pointer; padding: 0; line-height: 1; font-size: 15px; border-radius: 3px; }
-.clr { right: 20px; top: 50%; transform: translateY(-50%); width: 16px; height: 18px; }
+.rng .nbox input { padding-right: 34px; }
+.clr, .msx { position: absolute; border: 0; background: transparent; color: var(--danger); cursor: pointer; padding: 0; line-height: 1; font-size: 18px; font-weight: 700; border-radius: 3px; }
+.clr { right: 18px; top: 50%; transform: translateY(-50%); width: 14px; height: 18px; }
 .nbox input:placeholder-shown ~ .clr { display: none; }
 .msw { position: relative; }
 .msx { display: none; right: 6px; top: 50%; transform: translateY(-50%); width: 18px; height: 20px; }
 .msw.on .msx { display: block; }
 .msw.on .msbtn .arrow { visibility: hidden; }
-.clr:hover, .msx:hover { color: var(--accent); background: var(--accent-soft); }
-.clr:focus-visible, .msx:focus-visible { outline: 2px solid var(--accent); }
+.clr:hover, .msx:hover { color: var(--danger); background: var(--danger-soft); }
+.clr:focus-visible, .msx:focus-visible { outline: 2px solid var(--danger); }
 #thead input:not(:placeholder-shown) { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .unit { color: var(--muted); font-weight: 500; text-transform: none; letter-spacing: 0; }
 
@@ -149,8 +159,11 @@ td.model { font-weight: 600; }
 .model a { color: inherit; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
 .model a:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .model a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.star { color: var(--flag); font-weight: 700; }
-tr.soon td.model { box-shadow: inset 3px 0 0 var(--flag); }
+.info { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; margin-left: 6px; vertical-align: 1px; border: 1.5px solid var(--flag); border-radius: 50%; color: var(--flag); font: 700 10px/1 var(--font-ui); font-style: normal; cursor: help; }
+.info:hover, .info:focus-visible { background: var(--flag); color: var(--surface); }
+.info:focus-visible { outline: 2px solid var(--flag); outline-offset: 2px; }
+tr.soon td.model a { color: var(--muted); font-style: italic; font-weight: 500; }
+tr.soon td.model a:hover { color: var(--accent); }
 .brandcell { font-family: var(--font-head); font-weight: 600; font-size: 14.5px; }
 
 @media (min-width: 900px) {
@@ -184,21 +197,23 @@ tr.soon td.model { box-shadow: inset 3px 0 0 var(--flag); }
 
 </head>
 <body>
+<div class="page">
 <div class="top">
-  <div>
+  <div class="ttl">
+    <svg class="logo" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Logo Katalog EV">
+      <rect width="48" height="48" rx="12" fill="var(--accent)"/>
+      <path d="M27.5 7 14 26h8.2L19.5 41 34 20.5h-8.4z" fill="#fff"/>
+      <circle cx="38" cy="10" r="3" fill="#fff" opacity=".55"/>
+    </svg>
     <h1>Katalog EV w Polsce</h1>
-    <p class="sub">Osobowe samochody elektryczne w salonach i zapowiedziane na początek 2027. Stan na 23.10.2026, bez busów i vanów.</p>
-  </div>
-  <div class="stats" aria-live="polite">
-    <div class="stat"><b id="cnt">0</b><span>wyników</span></div>
-    <div class="stat"><b id="cntBrands">0</b><span>marek</span></div>
+    <p class="sub">Osobowe samochody elektryczne w salonach i zapowiedziane na początek 2027. Stan na 23.10.2026.</p>
   </div>
 </div>
 
 <div class="bar">
-  <input type="search" id="q" placeholder="Szukaj w całej tabeli (marka, model, nadwozie, napęd…)" aria-label="Szukaj w całej tabeli">
+  <input type="search" id="q" placeholder="Szukaj w całej tabeli…" aria-label="Szukaj w całej tabeli">
   <button class="reset" id="reset" type="button">Wyczyść filtry i sortowanie</button>
-  <span class="legend"><i>*</i> zamówienia otwarte lub premiera wkrótce · <em class="fbleg">szara kursywa</em> w cenie prom. = brak promocji, podano cenę katalogową</span>
+  <div class="stats" aria-live="polite"><span class="stat"><b id="cntBrands">0</b> marek</span><span class="stat"><b id="cnt">0</b> modeli</span></div>
 </div>
 
 <div class="wrap" id="wrap" tabindex="0" aria-label="Tabela pojazdów">
@@ -208,11 +223,8 @@ tr.soon td.model { box-shadow: inset 3px 0 0 var(--flag); }
     <tbody id="tbody"></tbody>
   </table>
 </div>
-
-<div class="foot">
-  <p>Puste pole (—) oznacza brak potwierdzonej wartości w źródłach, a nie zero. Zakres (np. 312–463) obejmuje różne wersje modelu. Zasięg to WLTP, ceny w zł brutto, długość w mm.</p>
-  <p>Cena kat. i prom. dotyczą najtańszej znalezionej wersji i mogą się różnić od cennika dealera. Wartości „do” (np. zasięg) podano jako maksimum. Filtry liczbowe pokazują modele, których zakres przecina podany przedział.</p>
 </div>
+
 
 <script>
 const R = [];
@@ -484,7 +496,7 @@ const COLS = [
   { k:"d",    t:"Napęd",            type:"text", w:96 },
   { k:"m",    t:"Miejsca",          type:"num", w:76, fmt:"int" },
   { k:"k",    t:"Bateria",          u:"kWh", type:"num", w:84, fmt:"dec" },
-  { k:"r",    t:"Zasięg",           u:"km",  type:"num", w:84, fmt:"int" },
+  { k:"r",    t:"Zasięg WLTP",           u:"km",  type:"num", w:84, fmt:"int" },
   { k:"a",    t:"MAX AC",     u:"kW",  type:"num", w:80, fmt:"dec" },
   { k:"q",    t:"MAX DC",     u:"kW",  type:"num", w:80, fmt:"dec" },
   { k:"h",    t:"Moc",              u:"KM",  type:"num", w:80, fmt:"int" }
@@ -531,7 +543,7 @@ const ROWS = R.map((x, i) => {
 });
 
 /* ---- state ---- */
-const state = { sort: null, dir: 1, q: "", ft: {}, fn: {}, fm: {} };
+const state = { sort: "brand", dir: 1, q: "", ft: {}, fn: {}, fm: {} };
 const MULTI = ["brand", "kraj", "p", "s", "d", "b"];
 const msVal = (r, k) => (k === "p" ? r.pd : k === "b" ? (r.b || "").replace(/\s*\(.*\)\s*$/, "") : r[k]);
 
@@ -573,10 +585,11 @@ function visible() {
     const dir = state.dir;
     const isNum = col.type === "num";
     const empty = r => (isNum ? !r[col.k] : !(col.k === "p" ? r.p : r[col.k]));
+    const bm = (a, b) => a.brand.localeCompare(b.brand, "pl", { numeric: true, sensitivity: "base" }) || a.model.localeCompare(b.model, "pl", { numeric: true, sensitivity: "base" }) || a.i - b.i;
     out = out.slice().sort((a, b) => {
       const ea = empty(a), eb = empty(b);
-      if (ea || eb) return ea === eb ? a.i - b.i : ea ? 1 : -1;
-      return cmp(a, b, col) * dir || a.i - b.i;
+      if (ea || eb) return ea === eb ? bm(a, b) : ea ? 1 : -1;
+      return cmp(a, b, col) * dir || bm(a, b);
     });
   }
   return out;
@@ -606,14 +619,14 @@ function buildHead() {
   const r2 = COLS.map((c, i) => {
     const cls = (c.type === "num" ? "num" : "") + cellClass(i);
     if (c.type === "nr") return `<th class="${cls}"></th>`;
-    if (MULTI.includes(c.k)) return `<th class="${cls}"><div class="msw"><button type="button" class="msbtn" data-ms="${c.k}" aria-haspopup="true" aria-expanded="false" aria-label="Filtr: ${esc(c.t)}"><span class="mslabel">Wszystkie</span><span class="arrow">▾</span></button><button type="button" class="msx" data-msx="${c.k}" aria-label="Wyczyść filtr: ${esc(c.t)}" title="Wyczyść filtr">×</button></div></th>`;
+    if (MULTI.includes(c.k)) return `<th class="${cls}"><div class="msw"><button type="button" class="msbtn" data-ms="${c.k}" aria-haspopup="true" aria-expanded="false" aria-label="Filtr: ${esc(c.t)}" title="Wybierz wartości"><span class="mslabel"></span><span class="arrow">▾</span></button><button type="button" class="msx" data-msx="${c.k}" aria-label="Wyczyść filtr: ${esc(c.t)}" title="Wyczyść filtr">×</button></div></th>`;
     if (c.type === "text") return `<th class="${cls}"><input type="search" id="f-${c.k}" data-ft="${c.k}" placeholder="szukaj" aria-label="Filtr: ${esc(c.t)}"></th>`;
     return `<th class="${cls}"><div class="rng"><label><span>od</span><input type="number" step="${stepOf(c.k)}" inputmode="decimal" id="f-${c.k}-min" data-fn="${c.k}" data-b="min" data-raw="${bounds(c).rmin}" placeholder="${bounds(c).min}" title="od (min w kolumnie)" aria-label="${esc(c.t)} od"></label><label><span>do</span><input type="number" step="${stepOf(c.k)}" inputmode="decimal" id="f-${c.k}-max" data-fn="${c.k}" data-b="max" data-raw="${bounds(c).rmax}" placeholder="${bounds(c).max}" title="do (max w kolumnie)" aria-label="${esc(c.t)} do"></label></div></th>`;
   }).join("");
   document.getElementById("thead").innerHTML = `<tr>${r1}</tr><tr>${r2}</tr>`;
 }
 
-const LS_KEY = "ev-katalog-filtry-v2";
+const LS_KEY = "ev-katalog-filtry-v3";
 function saveState() {
   try {
     const fm = {};
@@ -655,12 +668,12 @@ function render() {
         if (c.k === "model") {
           const clean = r.model.replace(/\*$/, "");
           const url = "https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(r.brand + " " + clean);
-          const name = '<a href="' + url + '" target="_blank" rel="noopener noreferrer" title="Zdjęcia: ' + esc(r.brand + " " + clean) + ' (Grafika Google)">' + esc(clean) + '</a>' + (r.soon ? '<span class="star">*</span>' : '');
+          const name = '<a href="' + url + '" target="_blank" rel="noopener noreferrer" title="Zdjęcia: ' + esc(r.brand + " " + clean) + ' (Grafika Google)">' + esc(clean) + '</a>' + (r.soon ? '<button type="button" class="info" aria-label="Zamówienia otwarte lub premiera wkrótce" title="Zamówienia otwarte lub premiera wkrótce">i</button>' : '');
           return `<td class="model${pc}">${name}</td>`;
         }
         if (c.k === "kraj") return r.kraj ? `<td title="${esc(r.krajN)}">${esc(r.kraj)}</td>` : `<td class="empty">—</td>`;
         if (c.k === "p") return r.pd ? `<td>${esc(r.pd)}</td>` : `<td class="empty">—</td>`;
-        if (c.type === "text") return r[c.k] ? `<td>${esc(r[c.k])}</td>` : `<td class="empty">—</td>`;
+        if (c.type === "text") return r[c.k] ? `<td>${esc(r[c.k]).replace(c.k === "d" ? /\//g : /$^/, "/<wbr>")}</td>` : `<td class="empty">—</td>`;
         const v = r[c.k];
         if (c.k === "z" && r.zf) return `<td class="num fb" title="Brak ceny promocyjnej: pokazano cenę katalogową">${fmtRange(v, c.fmt)}</td>`;
         return v ? `<td class="num">${fmtRange(v, c.fmt)}</td>` : `<td class="num empty">—</td>`;
@@ -710,6 +723,7 @@ function headWidth(c) {
   }
   return Math.ceil(w);
 }
+const MINW = { p: 86, d: 112 };
 function layout() {
   const widths = COLS.map((c, i) => {
     let font = BODY_FONT, w = 0;
@@ -717,16 +731,24 @@ function layout() {
     if (c.k === "nr") test(String(ROWS.length));
     else if (c.k === "brand") { font = '600 14.5px "Barlow Semi Condensed", "Barlow", system-ui, sans-serif'; ROWS.forEach(r => test(r.brand)); }
     else if (c.k === "model") { font = '600 14px "Barlow", system-ui, sans-serif'; ROWS.forEach(r => test(r.model)); }
+    else if (c.k === "d") ROWS.forEach(r => {
+      const v = r.d; if (!v) return;
+      const parts = v.split("/");
+      if (parts.length < 2) { test(v); return; }
+      let best = Infinity;
+      for (let j = 1; j < parts.length; j++) best = Math.min(best, Math.max(measure(font, parts.slice(0, j).join("/") + "/", 0), measure(font, parts.slice(j).join("/"), 0)));
+      w = Math.max(w, best);
+    });
     else if (c.type === "text") ROWS.forEach(r => { const v = c.k === "p" ? r.pd : r[c.k]; if (v) test(v); });
     else ROWS.forEach(r => { const v = r[c.k]; if (v) test(fmtRange(v, c.fmt)); });
     const cell = Math.ceil(w) + 22;
     if (c.k === "nr") return Math.max(cell, 40);
     const head = headWidth(c) + 36;
-    const filt = c.type === "num" ? Math.ceil(Math.max(measure(BODY_FONT, bounds(c).min, 0), measure(BODY_FONT, bounds(c).max, 0))) + 100 : (MULTI.includes(c.k) ? 112 : 92);
-    return Math.max(cell, head, filt);
+    const filt = c.type === "num" ? Math.ceil(Math.max(measure(BODY_FONT, bounds(c).min, 0), measure(BODY_FONT, bounds(c).max, 0))) + 82 : (MULTI.includes(c.k) ? 46 : 92);
+    return Math.max(cell, head, filt, MINW[c.k] || 0);
   });
-  document.getElementById("cols").innerHTML = widths.map(w => `<col style="width:${w}px">`).join("");
   const tbl = document.getElementById("tbl");
+  document.getElementById("cols").innerHTML = widths.map(w => `<col style="width:${w}px">`).join("");
   tbl.style.width = widths.reduce((a, b) => a + b, 0) + "px";
   tbl.style.setProperty("--l1", widths[0] + "px");
   tbl.style.setProperty("--l2", (widths[0] + widths[1]) + "px");
@@ -749,7 +771,7 @@ document.getElementById("thead").addEventListener("click", e => {
   const k = b.dataset.sort;
   if (state.sort !== k) { state.sort = k; state.dir = 1; }
   else if (state.dir === 1) { state.dir = -1; }
-  else { state.sort = null; state.dir = 1; }
+  else { state.sort = "brand"; state.dir = 1; }
   render();
 });
 /* strzałki w pustym polu startują od wartości z podpowiedzi (min / max kolumny), nie od zera */
@@ -850,7 +872,8 @@ function msLabel(k) {
   if (!btn) return;
   const sel = [...(state.fm[k] || [])].sort((a, b) => String(a).localeCompare(String(b), "pl", { numeric: true }));
   const n = sel.length;
-  btn.querySelector(".mslabel").textContent = n === 0 ? "Wszystkie" : n <= 2 ? sel.join(", ") : n + (n <= 4 ? " wybrane" : " wybranych");
+  btn.querySelector(".mslabel").textContent = n === 0 ? "" : n === 1 ? String(sel[0]) : "(" + n + ")";
+  btn.title = n ? sel.join(", ") : "Wybierz wartości";
   btn.classList.toggle("on", n > 0);
   if (btn.parentElement) btn.parentElement.classList.toggle("on", n > 0);
 }
@@ -913,10 +936,10 @@ document.addEventListener("mousedown", e => {
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && msPanel) msClose(true); });
 document.getElementById("wrap").addEventListener("scroll", () => msClose(false));
-window.addEventListener("resize", () => msClose(false));
+window.addEventListener("resize", () => { msClose(false); clearTimeout(window.__rz); window.__rz = setTimeout(layout, 120); });
 document.getElementById("q").addEventListener("input", e => { state.q = e.target.value; rerender(); });
 document.getElementById("reset").addEventListener("click", () => {
-  state.sort = null; state.dir = 1; state.q = ""; state.ft = {}; state.fn = {}; state.fm = {}; msClose(false); MULTI.forEach(msLabel);
+  state.sort = "brand"; state.dir = 1; state.q = ""; state.ft = {}; state.fn = {}; state.fm = {}; msClose(false); MULTI.forEach(msLabel);
   document.getElementById("q").value = "";
   document.querySelectorAll("#thead input").forEach(i => { i.value = ""; });
   render();
