@@ -404,6 +404,12 @@ R.forEach(x=>{const f=PATCH[x.brand+'|'+x.model];if(f)Object.assign(x.o,f);});
 const PATCH2 = {"Deepal|S05": {"p": "2026-05", "c": 169900, "l": 4620, "s": "C", "b": "SUV", "d": "FWD/AWD", "m": 5, "k": 68.8, "r": 485, "a": 11, "q": 200, "h": 238}, "Deepal|S07": {"p": "2026-05", "c": 204900, "l": 4750, "s": "D", "b": "SUV (coupé)", "d": "RWD", "m": 5, "k": 79.9, "r": 520, "a": 11, "q": 93, "h": 258}, "Denza|Z9 GT": {"p": "2026-08", "c": 490000, "l": 5180, "s": "E", "b": "Shooting brake", "d": "AWD", "m": 5, "k": 100.1, "r": 630, "a": 22, "q": 270, "h": "1000-1156"}, "GWM|Ora 5*": {"p": "2026", "c": 135000, "l": 4460, "s": "C", "b": "SUV", "d": "FWD", "m": 5, "k": 58.3, "r": 400, "a": 11, "q": 120, "h": 170}, "Hyundai|IONIQ 3": {"p": "2026-09", "c": 119900, "l": 4100, "s": "B", "b": "Hatchback", "d": "FWD", "m": 5, "k": "42.2-61", "r": 350, "a": 11, "q": 120, "h": 147}, "Kia|EV2": {"p": "2026", "c": 99900, "l": 4060, "s": "B", "b": "SUV", "d": "FWD", "m": 5, "k": "42.2-61", "r": "317-453", "a": 11, "q": 118, "h": 146}, "Leapmotor|B05": {"p": "2026-04", "c": 129900, "l": 4400, "s": "C", "b": "Hatchback", "d": "RWD", "m": 5, "k": "57-67", "r": 482, "a": 11, "q": 174, "h": 218, "z": 106900}, "Nevo|Q05*": {"p": "2027-Q1", "c": 130000, "l": 4539, "s": "C", "b": "SUV", "d": "FWD", "m": 5, "k": 52, "r": 400, "a": 11, "q": 100, "h": 215}, "Omoda|4 EV*": {"p": "2026", "c": 139900, "l": 4200, "s": "B", "b": "SUV", "d": "FWD", "m": 5, "k": 50, "r": 350, "a": 11, "q": 119, "h": 211}};
 R.forEach(x=>{const f=PATCH2[x.brand+'|'+x.model];if(f)Object.assign(x.o,f);});
 
+const PATCH3 = {"BMW|iX5*": {"a": 11}, "Exlantix|ES": {"a": 11}, "Exlantix|ET": {"a": 11}, "GAC / AION|AION UT": {"a": 6.6}, "GAC / AION|AION V": {"a": 11}, "GAC / AION|HYPTEC HT": {"a": 11}, "Hongqi|EH7": {"a": 11}, "Hongqi|EHS7": {"a": 11}, "Mercedes-Benz|AMG GT 4-Door Coupé Electric": {"a": 11}};
+R.forEach(x=>{const f=PATCH3[x.brand+'|'+x.model];if(f)Object.assign(x.o,f);});
+
+const PATCH4 = {"BMW|iX5*":{"l":4994},"Audi|A2 e-tron*":{"l":4324}};
+R.forEach(x=>{const f=PATCH4[x.brand+'|'+x.model];if(f)Object.assign(x.o,f);});
+
 /* ---- column model ---- */
 const COLS = [
   { k:"nr",   t:"Lp.",              type:"nr",   w:48 },
