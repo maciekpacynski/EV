@@ -431,6 +431,8 @@ R.forEach(x=>{if(x.brand==="Alpine"&&x.model==="A290")x.o.z=159900;});
 
 R.forEach(x=>{if(x.brand==="Hyundai"&&x.model==="IONIQ 6 N")x.o.z=303700;});
 
+R.forEach(x=>{if(x.brand==="Denza"&&x.model==="Z9 GT")x.o.q=1500;});
+
 /* ---- column model ---- */
 const COLS = [
   { k:"nr",   t:"Lp.",              type:"nr",   w:48 },
@@ -546,7 +548,7 @@ function bounds(c) {
   let lo = Infinity, hi = -Infinity;
   ROWS.forEach(r => { const v = r[c.k]; if (v) { lo = Math.min(lo, v[0]); hi = Math.max(hi, v[1]); } });
   if (lo !== Infinity && (c.k === "k" || c.k === "a")) lo = Math.floor(lo);
-  return lo === Infinity ? { min: "", max: "" } : { min: fmtNum(lo, c.fmt), max: fmtNum(hi, c.fmt) };
+  return lo === Infinity ? { min: "", max: "", rmin: "", rmax: "" } : { min: fmtNum(lo, c.fmt), max: fmtNum(hi, c.fmt), rmin: lo, rmax: hi };
 }
 function buildHead() {
   document.getElementById("cols").innerHTML = COLS.map(c => `<col style="width:${c.w}px">`).join("");
@@ -561,7 +563,7 @@ function buildHead() {
     const cls = (c.type === "num" ? "num" : "") + cellClass(i);
     if (c.type === "nr") return `<th class="${cls}"></th>`;
     if (c.type === "text") return `<th class="${cls}"><input type="search" id="f-${c.k}" data-ft="${c.k}" placeholder="szukaj" aria-label="Filtr: ${esc(c.t)}"></th>`;
-    return `<th class="${cls}"><div class="rng"><label><span>od</span><input type="number" step="any" inputmode="decimal" id="f-${c.k}-min" data-fn="${c.k}" data-b="min" placeholder="${bounds(c).min}" title="od (min w kolumnie)" aria-label="${esc(c.t)} od"></label><label><span>do</span><input type="number" step="any" inputmode="decimal" id="f-${c.k}-max" data-fn="${c.k}" data-b="max" placeholder="${bounds(c).max}" title="do (max w kolumnie)" aria-label="${esc(c.t)} do"></label></div></th>`;
+    return `<th class="${cls}"><div class="rng"><label><span>od</span><input type="number" step="${c.k === 'c' || c.k === 'z' ? 1000 : 1}" inputmode="decimal" id="f-${c.k}-min" data-fn="${c.k}" data-b="min" data-raw="${bounds(c).rmin}" placeholder="${bounds(c).min}" title="od (min w kolumnie)" aria-label="${esc(c.t)} od"></label><label><span>do</span><input type="number" step="${c.k === 'c' || c.k === 'z' ? 1000 : 1}" inputmode="decimal" id="f-${c.k}-max" data-fn="${c.k}" data-b="max" data-raw="${bounds(c).rmax}" placeholder="${bounds(c).max}" title="do (max w kolumnie)" aria-label="${esc(c.t)} do"></label></div></th>`;
   }).join("");
   document.getElementById("thead").innerHTML = `<tr>${r1}</tr><tr>${r2}</tr>`;
 }
@@ -668,6 +670,24 @@ document.getElementById("thead").addEventListener("click", e => {
   else if (state.dir === 1) { state.dir = -1; }
   else { state.sort = null; state.dir = 1; }
   render();
+});
+/* strzałki w pustym polu startują od wartości z podpowiedzi (min / max kolumny), nie od zera */
+function seedFromPlaceholder(t) {
+  if (t.value !== "" || t.dataset.raw === undefined || t.dataset.raw === "") return false;
+  t.value = t.dataset.raw;
+  t.dispatchEvent(new Event("input", { bubbles: true }));
+  return true;
+}
+document.getElementById("thead").addEventListener("mousedown", e => {
+  const t = e.target;
+  if (!t.dataset || !t.dataset.fn || t.value !== "") return;
+  const r = t.getBoundingClientRect();
+  if (e.clientX > r.right - 24 && seedFromPlaceholder(t)) e.preventDefault();
+});
+document.getElementById("thead").addEventListener("keydown", e => {
+  const t = e.target;
+  if (!t.dataset || !t.dataset.fn || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+  if (seedFromPlaceholder(t)) e.preventDefault();
 });
 document.getElementById("thead").addEventListener("input", e => {
   const t = e.target;
