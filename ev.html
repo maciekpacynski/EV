@@ -207,11 +207,16 @@ tr.soon td.model .mname { color: var(--muted); font-style: italic; font-weight: 
 .msbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .mspanel { position: fixed; z-index: 60; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
   box-shadow: 0 8px 24px rgba(0,0,0,.22); min-width: 220px; max-width: calc(100vw - 16px); display: flex; flex-direction: column; font-size: 14px; }
-.mspanel input[type="search"] { margin: 8px 8px 4px; width: calc(100% - 16px); }
+.mshead { display: flex; align-items: center; gap: 8px; padding: 8px 8px 4px 12px; }
+.mshead input[type="search"] { flex: 1 1 auto; width: auto; margin: 0; }
+.msall { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; flex: none; cursor: pointer; }
 .mslist { overflow: auto; max-height: min(320px, 55vh); padding: 4px 0; }
 [hidden] { display: none !important; }
 .msopt { display: flex; align-items: center; gap: 8px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
 .msopt:hover { background: var(--accent-soft); }
+.msopt.off { color: var(--dim); opacity: .55; cursor: default; }
+.msopt.off:hover { background: transparent; }
+.msopt.off input { cursor: default; }
 .msopt input { accent-color: var(--accent); margin: 0; }
 .msopt .n { margin-left: auto; padding-left: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .msfoot { display: flex; justify-content: space-between; gap: 8px; padding: 6px 8px; border-top: 1px solid var(--line); }
@@ -597,11 +602,11 @@ function cmp(a, b, col) {
   const A = a[col.k], B = b[col.k];
   return (A[0] - B[0]) || (A[1] - B[1]);
 }
-function visible() {
-  const q = strip(state.q.trim());
-  const pass = r => {
+function rowPass(r, skipFm) {
+    const q = strip(state.q.trim());
     if (q && !q.split(/\s+/).every(w => r.all.includes(w))) return false;
     for (const k in state.fm) {
+      if (k === skipFm) continue;
       const set = state.fm[k];
       if (set.size && !set.has(msVal(r, k))) return false;
     }
@@ -620,8 +625,9 @@ function visible() {
       if (max !== null && v[0] > max) return false;
     }
     return true;
-  };
-  const matched = ROWS.filter(pass);
+}
+function visible() {
+  const matched = ROWS.filter(r => rowPass(r));
   matchSet = new Set(matched);
   let out = state.hide ? matched : ROWS.slice();
   if (state.sort) {
@@ -951,7 +957,8 @@ document.getElementById("thead").addEventListener("input", e => {
 let msPanel = null, msKey = null;
 function msOptions(k) {
   const m = new Map();
-  ROWS.forEach(r => { const v = msVal(r, k); if (v) m.set(v, (m.get(v) || 0) + 1); });
+  ROWS.forEach(r => { const v = msVal(r, k); if (v && !m.has(v)) m.set(v, 0); });
+  ROWS.forEach(r => { const v = msVal(r, k); if (v && rowPass(r, k)) m.set(v, m.get(v) + 1); });
   const arr = [...m].map(([v, n]) => ({ v, n, label: k === "kraj" ? v + " – " + (COUNTRY[v] || "") : v }));
   arr.sort((a, b) => a.v.localeCompare(b.v, "pl", { numeric: true, sensitivity: "base" }));
   return arr;
@@ -983,8 +990,8 @@ function msOpen(k, btn) {
   p.setAttribute("role", "dialog");
   p.setAttribute("aria-label", "Filtr: " + COLS.find(c => c.k === k).t);
   const search = opts.length > 12 || k === "b";
-  p.innerHTML = (search ? '<input type="search" placeholder="szukaj na liście" aria-label="Szukaj na liście">' : "") +
-    '<div class="mslist">' + opts.map(o => '<label class="msopt"><input type="checkbox" value="' + esc(o.v) + '"' + (set.has(o.v) ? " checked" : "") + '><span>' + esc(o.label) + '</span><span class="n">' + o.n + '</span></label>').join("") + '</div>' +
+  p.innerHTML = '<div class="mshead"><input type="checkbox" class="msall" title="Zaznacz / odznacz wszystko" aria-label="Zaznacz lub odznacz wszystkie widoczne pozycje">' + (search ? '<input type="search" placeholder="szukaj na liście" aria-label="Szukaj na liście">' : "") + '</div>' +
+    '<div class="mslist">' + opts.filter(o => !state.hide || o.n > 0).map(o => { const off = o.n === 0; return '<label class="msopt' + (off ? " off" : "") + '"><input type="checkbox" value="' + esc(o.v) + '"' + (set.has(o.v) ? " checked" : "") + (off && !set.has(o.v) ? " disabled" : "") + '><span>' + esc(o.label) + '</span><span class="n">' + o.n + '</span></label>'; }).join("") + '</div>' +
     '<div class="msfoot"><button type="button" data-act="clear">Wyczyść</button><button type="button" data-act="close">Zamknij</button></div>';
   document.body.appendChild(p);
   msPanel = p;
@@ -993,15 +1000,33 @@ function msOpen(k, btn) {
   p.style.top = Math.min(r.bottom + 4, window.innerHeight - 120) + "px";
   p.style.left = Math.max(8, Math.min(r.left, window.innerWidth - p.offsetWidth - 8)) + "px";
   btn.setAttribute("aria-expanded", "true");
+  const master = p.querySelector(".msall");
+  const shown = () => [...p.querySelectorAll(".msopt")].filter(l => !l.hidden && !l.classList.contains("off")).map(l => l.querySelector("input"));
+  const syncMaster = () => {
+    const v = shown(), c = v.filter(x => x.checked).length;
+    master.checked = v.length > 0 && c === v.length;
+    master.indeterminate = c > 0 && c < v.length;
+    master.disabled = v.length === 0;
+  };
   p.addEventListener("change", e => {
     const cb = e.target;
     if (cb.type !== "checkbox") return;
+    if (cb === master) {
+      const on = master.checked;
+      shown().forEach(x => { x.checked = on; if (on) set.add(x.value); else set.delete(x.value); });
+      if (!on) p.querySelectorAll(".msopt.off input").forEach(x => { x.checked = false; set.delete(x.value); });
+      master.indeterminate = false;
+      msLabel(k); render();
+      return;
+    }
     if (cb.checked) set.add(cb.value); else set.delete(cb.value);
+    syncMaster();
     msLabel(k); render();
   });
+  syncMaster();
   p.addEventListener("click", e => {
     const a = e.target.dataset && e.target.dataset.act;
-    if (a === "clear") { set.clear(); p.querySelectorAll("input[type=checkbox]").forEach(c => { c.checked = false; }); msLabel(k); render(); }
+    if (a === "clear") { set.clear(); p.querySelectorAll("input[type=checkbox]").forEach(c => { c.checked = false; c.indeterminate = false; }); msLabel(k); render(); }
     if (a === "close") msClose(true);
   });
   const s = p.querySelector('input[type="search"]');
@@ -1009,10 +1034,11 @@ function msOpen(k, btn) {
     s.addEventListener("input", () => {
       const q = strip(s.value.trim());
       p.querySelectorAll(".msopt").forEach(l => { l.hidden = q && !strip(l.textContent).includes(q); });
+      syncMaster();
     });
     s.focus();
   } else {
-    const f = p.querySelector("input[type=checkbox]"); if (f) f.focus();
+    const f = p.querySelector(".msopt input"); if (f) f.focus();
   }
 }
 document.getElementById("thead").addEventListener("click", e => {
