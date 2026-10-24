@@ -17,6 +17,7 @@ body{margin:0}
   --surface: #ffffff;
   --head: #e2e8ec;
   --zebra: #f6f8f9;
+  --dim: #b4bec6;
   --ink: #15212a;
   --muted: #5a6975;
   --line: #d3dbe1;
@@ -36,6 +37,7 @@ body{margin:0}
     --surface: #151f26;
     --head: #1c2a33;
     --zebra: #121b21;
+    --dim: #4b5963;
     --ink: #e5ecf0;
     --muted: #93a3ae;
     --line: #29383f;
@@ -53,6 +55,7 @@ body{margin:0}
   --surface: #151f26;
   --head: #1c2a33;
   --zebra: #121b21;
+  --dim: #4b5963;
   --ink: #e5ecf0;
   --muted: #93a3ae;
   --line: #29383f;
@@ -86,6 +89,13 @@ body {
 h1 { font-family: var(--font-head); font-weight: 700; font-size: clamp(26px, 4vw, 38px); letter-spacing: 0.01em; line-height: 1.05; margin: 0 0 4px; text-wrap: balance; }
 .sub { color: var(--muted); margin: 0; max-width: 62ch; }
 .stats { display: flex; gap: 16px; align-items: baseline; margin-left: 6px; font-family: var(--font-head); color: var(--muted); font-size: 15px; white-space: nowrap; }
+.hidefilt { display: inline-flex; align-items: center; gap: 7px; margin-left: 34px; cursor: pointer; font-weight: 500; user-select: none; }
+.hidefilt input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; cursor: pointer; }
+tr.dim td { color: var(--dim) !important; }
+tr.dim td *, tr.dim td .mname { color: inherit !important; font-weight: inherit; }
+tr.dim .info { border-color: currentColor; }
+tbody tr.dim:hover td { background: var(--surface); }
+tbody tr.dim:nth-child(even):hover td { background: var(--zebra); }
 .stat b { color: var(--ink); font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; margin-right: 2px; }
 
 .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
@@ -228,6 +238,7 @@ tr.soon td.model .mname { color: var(--muted); font-style: italic; font-weight: 
   <input type="search" id="q" placeholder="Szukaj w całej tabeli…" aria-label="Szukaj w całej tabeli">
   <button class="reset" id="reset" type="button">Wyczyść filtry i sortowanie</button>
   <div class="stats" aria-live="polite"><span class="stat"><b id="cntBrands">0</b> marek</span><span class="stat"><b id="cnt">0</b> modeli</span></div>
+  <label class="hidefilt"><input type="checkbox" id="hideOff" checked> Ukryj odfiltrowane</label>
 </div>
 
 <div class="wrap" id="wrap" tabindex="0" aria-label="Tabela pojazdów">
@@ -561,7 +572,8 @@ const ROWS = R.map((x, i) => {
 });
 
 /* ---- state ---- */
-const state = { sort: "brand", dir: 1, q: "", ft: {}, fn: {}, fm: {} };
+const state = { sort: "brand", dir: 1, q: "", ft: {}, fn: {}, fm: {}, hide: true };
+let matchSet = new Set();
 const MULTI = ["brand", "kraj", "p", "s", "d", "b"];
 const msVal = (r, k) => (k === "p" ? r.pd : k === "b" ? (r.b || "").replace(/\s*\(.*\)\s*$/, "") : r[k]);
 
@@ -576,7 +588,7 @@ function cmp(a, b, col) {
 }
 function visible() {
   const q = strip(state.q.trim());
-  let out = ROWS.filter(r => {
+  const pass = r => {
     if (q && !q.split(/\s+/).every(w => r.all.includes(w))) return false;
     for (const k in state.fm) {
       const set = state.fm[k];
@@ -597,7 +609,10 @@ function visible() {
       if (max !== null && v[0] > max) return false;
     }
     return true;
-  });
+  };
+  const matched = ROWS.filter(pass);
+  matchSet = new Set(matched);
+  let out = state.hide ? matched : ROWS.slice();
   if (state.sort) {
     const col = COLS.find(c => c.k === state.sort);
     const dir = state.dir;
@@ -670,7 +685,7 @@ function saveState() {
   try {
     const fm = {};
     for (const k in state.fm) fm[k] = [...state.fm[k]];
-    localStorage.setItem(LS_KEY, JSON.stringify({ sort: state.sort, dir: state.dir, q: state.q, ft: state.ft, fn: state.fn, fm }));
+    localStorage.setItem(LS_KEY, JSON.stringify({ sort: state.sort, dir: state.dir, q: state.q, ft: state.ft, fn: state.fn, fm, hide: state.hide }));
   } catch (e) {}
 }
 function loadState() {
@@ -680,6 +695,7 @@ function loadState() {
     const o = JSON.parse(raw);
     if (o.sort && COLS.some(c => c.k === o.sort)) { state.sort = o.sort; state.dir = o.dir === -1 ? -1 : 1; }
     if (typeof o.q === "string") state.q = o.q;
+    if (typeof o.hide === "boolean") { state.hide = o.hide; document.getElementById("hideOff").checked = o.hide; }
     for (const k in (o.ft || {})) if (COLS.some(c => c.k === k) && typeof o.ft[k] === "string") state.ft[k] = o.ft[k];
     for (const k in (o.fn || {})) if (COLS.some(c => c.k === k) && o.fn[k]) state.fn[k] = { min: o.fn[k].min ?? null, max: o.fn[k].max ?? null };
     for (const k in (o.fm || {})) if (MULTI.includes(k) && Array.isArray(o.fm[k]) && o.fm[k].length) state.fm[k] = new Set(o.fm[k]);
@@ -695,14 +711,18 @@ function loadState() {
 function render() {
   saveState();
   const rows = visible();
+  const mrows = state.hide ? rows : rows.filter(r => matchSet.has(r));
   const tb = document.getElementById("tbody");
-  if (!rows.length) {
+  let lpn = 0;
+  if (!mrows.length && state.hide) {
     tb.innerHTML = `<tr><td colspan="${COLS.length}" class="none">Brak pojazdów dla podanych warunków filtrowania.</td></tr>`;
   } else {
-    tb.innerHTML = rows.map((r, n) => {
+    tb.innerHTML = rows.map(r => {
+      const ok = matchSet.has(r);
+      const n = ok ? lpn++ : -1;
       const tds = COLS.map((c, i) => {
         const pc = cellClass(i);
-        if (c.k === "nr") return `<td class="num${pc}">${n + 1}</td>`;
+        if (c.k === "nr") return ok ? `<td class="num${pc}">${n + 1}</td>` : `<td class="num${pc}"></td>`;
         if (c.k === "brand") {
           const u = BRAND_URL[r.brand];
           const web = u ? '<a class="cam" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer" title="Strona marki: ' + esc(r.brand) + '" aria-label="Strona marki: ' + esc(r.brand) + '"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.9 5.6 3.9 9s-1.3 6.4-3.9 9c-2.6-2.6-3.9-5.6-3.9-9S9.4 5.6 12 3z"/></svg></a>' : '';
@@ -722,12 +742,12 @@ function render() {
         if (c.k === "z" && r.zf) return `<td class="num fb" title="Brak ceny promocyjnej: pokazano cenę katalogową">${fmtRange(v, c.fmt)}</td>`;
         return v ? `<td class="num">${fmtRange(v, c.fmt)}</td>` : `<td class="num empty">—</td>`;
       }).join("");
-      return `<tr class="${r.soon ? "soon" : ""}">${tds}</tr>`;
+      return `<tr class="${r.soon ? "soon" : ""}${ok ? "" : " dim"}"${ok ? "" : ' aria-disabled="true"'}>${tds}</tr>`;
     }).join("");
   }
-  document.getElementById("cnt").textContent = rows.length;
-  document.getElementById("lpShown").textContent = rows.length;
-  document.getElementById("cntBrands").textContent = new Set(rows.map(r => r.brand)).size;
+  document.getElementById("cnt").textContent = mrows.length;
+  document.getElementById("lpShown").textContent = mrows.length;
+  document.getElementById("cntBrands").textContent = new Set(mrows.map(r => r.brand)).size;
   document.querySelectorAll("#thead th[data-k]").forEach(th => {
     const k = th.dataset.k;
     const on = state.sort === k;
@@ -986,6 +1006,7 @@ document.addEventListener("mousedown", e => {
 document.addEventListener("keydown", e => { if (e.key === "Escape" && msPanel) msClose(true); });
 document.getElementById("wrap").addEventListener("scroll", () => msClose(false));
 window.addEventListener("resize", () => { msClose(false); clearTimeout(window.__rz); window.__rz = setTimeout(layout, 120); });
+document.getElementById("hideOff").addEventListener("change", e => { state.hide = e.target.checked; render(); });
 document.getElementById("q").addEventListener("input", e => { state.q = e.target.value; rerender(); });
 document.getElementById("reset").addEventListener("click", () => {
   state.sort = "brand"; state.dir = 1; state.q = ""; state.ft = {}; state.fn = {}; state.fm = {}; msClose(false); MULTI.forEach(msLabel);
