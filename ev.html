@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Katalog EV Polska</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2048%2048%22%3E%3Crect%20width=%2248%22%20height=%2248%22%20rx=%2212%22%20fill=%22%230b7a5c%22/%3E%3Cpath%20d=%22M27.5%207%2014%2026h8.2L19.5%2041%2034%2020.5h-8.4z%22%20fill=%22%23fff%22/%3E%3C/svg%3E">
+<title>Katalog BEV Polska</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap">
@@ -105,7 +106,7 @@ button.reset {
 }
 button.reset:hover { background: var(--accent-soft); }
 
-.wrap { overflow-x: auto; overflow-y: hidden; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.wrap { overflow-x: auto; overflow-y: hidden; border: 1px solid var(--ink); border-radius: 6px; background: var(--surface); }
 .wrap.fits { overflow: visible; }
 .wrap.fits thead tr:first-child th:first-child { border-top-left-radius: 6px; }
 table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; }
@@ -119,7 +120,7 @@ td.empty { color: var(--muted); opacity: 0.55; }
 
 thead th { position: sticky; z-index: 3; background: var(--head); }
 thead tr:first-child th { top: 0; height: var(--h1); padding: 0; }
-thead tr:nth-child(2) th { top: var(--h1); padding: 6px 6px; border-bottom: 2px solid var(--line); }
+thead tr:nth-child(2) th { top: var(--h1); padding: 6px 6px; border-bottom: 2px solid var(--ink); }
 .sortbtn {
   all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; gap: 6px;
   width: 100%; height: var(--h1); padding: 7px 8px 0;
@@ -155,22 +156,33 @@ th[aria-sort="ascending"] .arrow, th[aria-sort="descending"] .arrow { opacity: 1
 .clr:hover, .msx:hover { color: var(--danger); background: var(--danger-soft); }
 .clr:focus-visible, .msx:focus-visible { outline: 2px solid var(--danger); }
 #thead input:not(:placeholder-shown) { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.lpcnt { display: flex; flex-direction: column; align-items: center; line-height: 1.2; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lpcnt b { color: var(--ink); font-size: 15px; }
+.info.colinfo { position: absolute; bottom: 6px; left: 8px; margin: 0; width: 14px; height: 14px; font-size: 9px; }
+#tip { white-space: pre-line; position: fixed; z-index: 80; max-width: 340px; padding: 10px 12px; background: var(--ink); color: var(--surface); border-radius: 6px; font-size: 13px; line-height: 1.4; font-weight: 400; text-transform: none; letter-spacing: 0; box-shadow: 0 8px 24px rgba(0,0,0,.28); pointer-events: none; }
+#tip b { display: block; margin-bottom: 3px; font-family: var(--font-head); font-size: 14px; letter-spacing: .02em; }
 .unit { color: var(--muted); font-weight: 500; text-transform: none; letter-spacing: 0; }
 
+th, td { border-right: 1px solid var(--line); }
+th:last-child, td:last-child { border-right: 0; }
+thead th { border-right-color: var(--ink); }
+th.p2, td.p2 { border-right: 2px solid var(--ink); }
+th.p0, td.p0 { border-right-color: var(--ink); }
 td.model { font-weight: 600; }
-.model a { color: inherit; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
-.model a:hover { color: var(--accent); text-decoration-color: var(--accent); }
-.model a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mcell { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mname { min-width: 0; }
+.cam { flex: none; display: inline-flex; color: var(--ink); opacity: .75; border-radius: 3px; }
+.cam:hover { color: var(--accent); opacity: 1; }
+.cam:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; opacity: 1; }
 .info { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; margin-left: 6px; vertical-align: 1px; border: 1.5px solid var(--flag); border-radius: 50%; color: var(--flag); font: 700 10px/1 var(--font-ui); font-style: normal; cursor: help; }
 .info:hover, .info:focus-visible { background: var(--flag); color: var(--surface); }
 .info:focus-visible { outline: 2px solid var(--flag); outline-offset: 2px; }
-tr.soon td.model a { color: var(--muted); font-style: italic; font-weight: 500; }
-tr.soon td.model a:hover { color: var(--accent); }
+tr.soon td.model .mname { color: var(--muted); font-style: italic; font-weight: 500; }
 .brandcell { font-family: var(--font-head); font-weight: 600; font-size: 14.5px; }
 
 @media (min-width: 900px) {
   .p0, .p1, .p2 { position: sticky; z-index: 2; }
-  .p0 { left: 0; } .p1 { left: var(--l1, 48px); } .p2 { left: var(--l2, 168px); box-shadow: 1px 0 0 var(--line); }
+  .p0 { left: 0; } .p1 { left: var(--l1, 48px); } .p2 { left: var(--l2, 168px); }
   thead .p0, thead .p1, thead .p2 { z-index: 5; }
 }
 .msbtn { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 6px; cursor: pointer;
@@ -202,12 +214,12 @@ tr.soon td.model a:hover { color: var(--accent); }
 <div class="page">
 <div class="top">
   <div class="ttl">
-    <svg class="logo" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Logo Katalog EV">
+    <svg class="logo" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Logo katalogu BEV">
       <rect width="48" height="48" rx="12" fill="var(--accent)"/>
       <path d="M27.5 7 14 26h8.2L19.5 41 34 20.5h-8.4z" fill="#fff"/>
       <circle cx="38" cy="10" r="3" fill="#fff" opacity=".55"/>
     </svg>
-    <h1>Katalog EV w Polsce</h1>
+    <h1>Katalog samochodów BEV w Polsce</h1>
     <p class="sub">Osobowe samochody elektryczne w salonach i zapowiedziane na początek 2027. Stan na 23.10.2026.</p>
   </div>
 </div>
@@ -485,6 +497,7 @@ R.forEach(x=>{if(x.brand==="Denza"&&x.model==="Z9 GT")x.o.q=1500;});
 
 const BAG = {"Abarth|500e": "185-550", "Abarth|600e": "360-1231", "Alfa Romeo|Junior Elettrica": "400-1265", "Alpine|A290": "326-1105", "Alpine|A390": "400-1250", "Audi|A2 e-tron": "380-1200", "Audi|A6 Avant e-tron": "502-1422", "Audi|A6 e-tron": "502-1422", "Audi|e-tron GT": "405-1050", "Audi|Q4 e-tron": "520-1490", "Audi|Q4 Sportback e-tron": "535-1460", "Audi|Q6 e-tron": "526-1529", "Audi|Q6 Sportback e-tron": "511-1373", "Audi|Q8 e-tron": "569-1637", "Audi|RS e-tron GT": "350-1000", "Audi|S e-tron GT": "405-1050", "Audi|S6 Avant e-tron": "502-1422", "Audi|S6 e-tron": "502-1422", "Audi|SQ6 e-tron": "526-1529", "Audi|SQ6 Sportback e-tron": "511-1373", "BMW|i3 Neue Klasse": "480-1350", "BMW|i4": "470-1290", "BMW|i5": "490-1350", "BMW|i5 Touring": "570-1700", "BMW|i7": "500-1300", "BMW|iX": "500-1750", "BMW|iX1": "490-1495", "BMW|iX2": "525-1400", "BMW|iX3 Neue Klasse": "520-1560", "BMW|iX5": "550-1850", "BYD|Atto 2": "400-1310", "BYD|Atto 3 / Atto 3 EVO": "440-1338", "BYD|Dolphin": "345-1310", "BYD|Dolphin Surf": "230-910", "BYD|Han": "410-1100", "BYD|Seal": "400-1100", "BYD|Seal U": "552-1440", "BYD|Sealion 7": "500-1769", "BYD|Tang": "235-1655", "Citroën|ë-C3": "310-1030", "Citroën|ë-C3 Aircross": "460-1600", "Citroën|ë-C4": "380-1250", "Citroën|ë-C4 X": "510-1360", "Citroën|ë-C5 Aircross": "580-1630", "CUPRA|Born": "385-1267", "CUPRA|Raval": "350-1150", "CUPRA|Tavascan": "540-1400", "Dacia|Spring": "308-1004", "Deepal|S05": "492-1250", "Deepal|S07": "445-1380", "Denza|Z9 GT": "480-1350", "Dongfeng|BOX / Nammi 01": "326-945", "DS Automobiles|DS 3 E-TENSE": "350-1050", "DS Automobiles|DS 4 E-TENSE": "390-1240", "DS Automobiles|DS N°8": "510-1450", "Exlantix|ES": "450-1200", "Exlantix|ET": "540-1500", "Fiat|500e": "185-550", "Fiat|600e": "360-1231", "Fiat|Grande Panda Electric": "361-1200", "Ford|Capri": "572-1510", "Ford|Explorer EV": "450-1422", "Ford|Mustang Mach-E": "402-1420", "Ford|Puma Gen-E": "456-1216", "GAC / AION|AION UT": "440-1200", "GAC / AION|AION V": "427-1180", "GAC / AION|HYPTEC HT": "670-1857", "Geely|E5 / Galaxy E5": "461-1420", "GWM|Ora 5": "380-1200", "Honda|e:Ny1": "361-1176", "Hongqi|E-HS9": "435-1850", "Hongqi|EH7": "450-1250", "Hongqi|EHS7": "520-1500", "Hyundai|INSTER": "238-1059", "Hyundai|IONIQ 3": "360-1150", "Hyundai|IONIQ 5": "527-1587", "Hyundai|IONIQ 5 N": "480-1540", "Hyundai|IONIQ 6": "401-1150", "Hyundai|IONIQ 6 N": "401-1150", "Hyundai|IONIQ 9": "620-1800", "Hyundai|KONA Electric": "466-1300", "Jaecoo|E5": "410-1338", "Jeep|Avenger Electric": "355-1250", "Jeep|Wagoneer S": "866-1812", "KGM (d. SsangYong)|Korando e-Motion": "551-1248", "KGM (d. SsangYong)|Torres EVX": "839-1662", "Kia|EV2": "350-1150", "Kia|EV3": "460-1250", "Kia|EV4": "430-1200", "Kia|EV4 Fastback": "490-1280", "Kia|EV5": "513-1715", "Kia|EV6": "490-1300", "Kia|EV6 GT": "480-1260", "Kia|EV9": "333-2318", "Kia|Niro EV": "475-1392", "Lancia|Ypsilon Electric": "309-1010", "Leapmotor|B05": "380-1200", "Leapmotor|B10": "420-1300", "Leapmotor|C10": "435-1410", "Leapmotor|T03": "210-880", "Lexus|ES": "454-1150", "Lexus|RZ": "522-1451", "Lexus|UX 300e": "367-1231", "Lotus|Eletre": "688-1532", "Lotus|Emeya": "509-1380", "Maserati|GranCabrio Folgore": "151-320", "Maserati|GranTurismo Folgore": "270-650", "Maserati|Grecale Folgore": "535-1625", "Mazda|6e": "460-1250", "Mazda|CX-6e": "500-1500", "Mazda|MX-30": "366-1171", "Mercedes-Benz|AMG GT 4-Door Coupé Electric": "400-1100", "Mercedes-Benz|CLA Electric": "460-1250", "Mercedes-Benz|CLA Shooting Brake Electric": "495-1370", "Mercedes-Benz|EQA": "340-1320", "Mercedes-Benz|EQB": "495-1710", "Mercedes-Benz|EQE": "430-1200", "Mercedes-Benz|EQE SUV": "520-1675", "Mercedes-Benz|EQG": "550-1985", "Mercedes-Benz|EQS": "610-1770", "Mercedes-Benz|EQS SUV": "645-2100", "Mercedes-Benz|GLA Electric": "435-1320", "Mercedes-Benz|GLB Electric": "500-1680", "Mercedes-Benz|GLC Electric": "550-1600", "Mercedes-Maybach|EQS SUV": "520-1800", "MG Motor|Cyberster": "249", "MG Motor|MG4": "363-1177", "MG Motor|MG5 EV": "479-1367", "MG Motor|MGS5 EV": "420-1350", "MG Motor|MGS6 EV": "500-1468", "MINI|Aceman": "300-1005", "MINI|Cooper Electric": "210-800", "MINI|Countryman E": "460-1450", "Nevo|Q05": "471-1380", "NIO|EL6": "579-1430", "NIO|EL7": "570-1545", "NIO|EL8": "230-1525", "NIO|ET5": "386-1100", "NIO|ET5 Touring": "450-1300", "NIO|ET7": "363-1050", "Nissan|Ariya": "468-1350", "Nissan|Leaf": "435-1176", "Nissan|Micra EV": "326-1105", "Omoda|4 EV": "360-1150", "Omoda|5 EV / Omoda E5": "380-1150", "Opel|Astra Electric": "352-1268", "Opel|Astra Sports Tourer Electric": "516-1553", "Opel|Corsa Electric": "309-1018", "Opel|Frontera Electric": "460-1600", "Opel|Grandland Electric": "550-1645", "Opel|Mokka Electric": "310-1105", "Peugeot|e-208": "311-1106", "Peugeot|e-308": "361-1271", "Peugeot|e-308 SW": "548-1574", "Peugeot|e-408": "471-1545", "Peugeot|e-2008": "434-1467", "Peugeot|e-3008": "520-1480", "Peugeot|e-5008": "348-1815", "Polestar|Polestar 2": "405-1095", "Polestar|Polestar 3": "484-1411", "Polestar|Polestar 4": "526-1536", "Polestar|Polestar 5": "460-1200", "Porsche|Cayenne Coupé Electric": "510-1347", "Porsche|Cayenne Electric": "570-1588", "Porsche|Macan Electric": "540-1348", "Porsche|Taycan": "407-1100", "Renault|4 E-Tech": "420-1400", "Renault|5 E-Tech": "326-1105", "Renault|Megane E-Tech": "440-1332", "Renault|Scenic E-Tech": "545-1670", "Renault|Twingo E-Tech": "219-980", "Seres|3 EV": "318-1247", "Seres|5 EV": "367-723", "Seres|7 EV": "686-1610", "Seres|9 EV": "300-1500", "Seres|GT EV": "450-1200", "Skoda|Elroq": "470-1580", "Skoda|Enyaq": "585-1711", "Skoda|Enyaq Coupe": "570-1610", "Skoda|Epiq": "490-1400", "Skoda|Peaq": "610-1800", "Skywell|ET5 / BE11": "467-1141", "smart|#1": "323-986", "smart|#3": "370-1160", "Subaru|E-Outback": "520-1600", "Subaru|Solterra": "452-1268", "Subaru|Uncharted": "430-1250", "Suzuki|e Vitara": "306-1200", "Tesla|Model 3": "594-1140", "Tesla|Model Y": "854-2158", "Toyota|bZ4X": "452-1268", "Toyota|bZ4X Touring": "520-1550", "Toyota|C-HR+": "410-1250", "Toyota|Urban Cruiser EV": "306-1200", "Volkswagen|ID. Cross": "490-1400", "Volkswagen|ID. Polo": "351-1125", "Volkswagen|ID. Tiguan": "530-1550", "Volkswagen|ID.3 / ID.3 Neo": "385-1267", "Volkswagen|ID.4": "543-1575", "Volkswagen|ID.5": "549-1561", "Volkswagen|ID.7": "532-1586", "Volkswagen|ID.7 Tourer": "605-1714", "Volvo|EC40": "413-1205", "Volvo|ES90": "420-1200", "Volvo|EX30": "318-904", "Volvo|EX40": "419-1295", "Volvo|EX60": "500-1500", "Volvo|EX90": "347-1915", "Voyah|Courage": "520-1510", "Voyah|Free": "560-1320", "XPeng|G6": "571-1374", "XPeng|G9": "660-1576", "XPeng|P7": "440-1100", "XPeng|P7+": "725-1707", "Zeekr|001": "539-2144", "Zeekr|7GT": "500-1500", "Zeekr|7X": "616-1978", "Zeekr|X": "362-1182"};
 R.forEach(x => { const v = BAG[x.brand + "|" + x.model.replace(/\*$/, "")]; if (v !== undefined) x.o.g = v; });
+const BRAND_URL = {"Abarth": "https://www.abarth.pl", "Alfa Romeo": "https://www.alfaromeo.pl", "Alpine": "https://www.alpinecars.pl", "Audi": "https://www.audi.pl", "BMW": "https://www.bmw.pl", "BYD": "https://www.byd.com/pl", "Citroën": "https://www.citroen.pl", "CUPRA": "https://www.cupraofficial.pl", "Dacia": "https://www.dacia.pl", "Deepal": "https://www.deepalauto.pl", "Denza": "https://www.denza.com", "Dongfeng": "https://www.dongfeng-polska.pl", "DS Automobiles": "https://www.dsautomobiles.pl", "Exlantix": "https://www.exlantix.pl", "Fiat": "https://www.fiat.pl", "Ford": "https://www.ford.pl", "GAC / AION": "https://www.gac-motor.com", "Geely": "https://www.geely.pl", "GWM": "https://www.gwm-global.com", "Honda": "https://www.honda.pl", "Hongqi": "https://www.hongqi-auto.pl", "Hyundai": "https://www.hyundai.pl", "Jaecoo": "https://www.jaecoo.pl", "Jeep": "https://www.jeep.pl", "KGM (d. SsangYong)": "https://www.kgm-auto.pl", "Kia": "https://www.kia.com/pl", "Lancia": "https://www.lancia.com", "Leapmotor": "https://www.leapmotor.pl", "Lexus": "https://www.lexus-polska.pl", "Lotus": "https://www.lotuscars.com", "Maserati": "https://www.maserati.com/pl/pl", "Mazda": "https://www.mazda.pl", "Mercedes-Benz": "https://www.mercedes-benz.pl", "Mercedes-Maybach": "https://www.mercedes-benz.pl", "MG Motor": "https://mgmotor.pl", "MINI": "https://www.mini.com.pl", "Nevo": "https://www.changan.com.cn", "NIO": "https://www.nio.com", "Nissan": "https://www.nissan.pl", "Omoda": "https://www.omoda.pl", "Opel": "https://www.opel.pl", "Peugeot": "https://www.peugeot.pl", "Polestar": "https://www.polestar.com/pl", "Porsche": "https://www.porsche.pl", "Renault": "https://www.renault.pl", "Rolls-Royce": "https://www.rolls-royce-motorcars.com", "Seres": "https://www.seres.pl", "Skoda": "https://www.skoda-auto.pl", "Skywell": "https://www.skywell-auto.pl", "smart": "https://www.smart.mercedes-benz.com/pl/pl", "Subaru": "https://www.subaru.pl", "Suzuki": "https://www.suzuki.pl", "Tesla": "https://www.tesla.com/pl_pl", "Toyota": "https://www.toyota.pl", "Volkswagen": "https://www.volkswagen.pl", "Volvo": "https://www.volvocars.com/pl", "Voyah": "https://www.voyah-auto.pl", "XPeng": "https://www.xpeng.pl", "Zeekr": "https://www.zeekr.pl"};
 /* ---- column model ---- */
 const COLS = [
   { k:"nr",   t:"Lp.",              type:"nr",   w:48 },
@@ -604,6 +617,26 @@ function visible() {
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
 function cellClass(i) { return i < 3 ? " p" + i : ""; }
 
+const TIPS = {
+  nr: ["LP.", "Numer pozycji na liście. Zmienia się razem z filtrami i sortowaniem."],
+  brand: ["Marka", "Producent samochodu.\nIkona globu – polska strona marki.\nFiltr: lista z wielokrotnym wyborem i wyszukiwaniem."],
+  model: ["Model", "Nazwa modelu bez wskazania wersji.\nIkona aparatu – zdjęcia modelu w Grafice Google.\nSzara kursywa z ikoną (i) – zamówienia otwarte albo premiera w Polsce wkrótce."],
+  kraj: ["Kraj", "Kraj, z którego wywodzi się marka (kod ISO), a nie kraj produkcji.\nDE – Niemcy, FR – Francja, CN – Chiny…\nNajechanie na kod pokazuje pełną nazwę."],
+  p: ["W PL OD", "Rok, od którego model jest (lub ma być) oferowany w polskich salonach.\nPodany tylko rok, bez miesiąca."],
+  c: ["Katalogowa od", "Najniższa znaleziona cena katalogowa brutto w zł.\nDotyczy najtańszej wersji.\nMoże się różnić od cennika konkretnego dealera."],
+  z: ["Promocyjna od", "Najniższa znaleziona cena brutto w zł po aktualnej promocji producenta lub importera.\nSzara kursywa – brak promocji, pokazano cenę katalogową."],
+  l: ["Długość", "Całkowita długość nadwozia w milimetrach.\nPomaga ocenić, czy auto zmieści się w garażu lub na miejscu parkingowym."],
+  s: ["Segment", "Klasa wielkości wg europejskiej klasyfikacji:\nA – miejskie\nB – małe\nC – kompaktowe\nD – średnie\nE – wyższa klasa średnia\nF – luksusowe\nS – sportowe i coupé"],
+  b: ["Typ nadwozia", "Rodzaj nadwozia. W filtrze warianty z nawiasu (np. SUV coupé) są scalone z typem podstawowym, w tabeli widać pełną nazwę.\nSUV – podwyższone nadwozie, dużo miejsca i wysoka pozycja siedzenia\nSedan – klasyczne, z osobnym, zamkniętym bagażnikiem\nHatchback – krótkie, z tylną klapą razem z szybą\nLiftback – kształt sedana, ale z dużą klapą razem z tylną szybą\nFastback – opadająca linia dachu aż do tyłu\nKombi – wydłużony tył i duży bagażnik\nShooting brake – sportowe kombi z opadającym dachem\nCoupé – niskie, sportowe, zwykle z dwoma drzwiami\nKabriolet – z otwieranym dachem i tylnymi siedzeniami\nRoadster – dwumiejscowy, otwarty samochód sportowy"],
+  d: ["Napęd", "Które koła są napędzane:\nFWD – przednie\nRWD – tylne\nAWD – wszystkie cztery\nUkośnik oznacza kilka wersji do wyboru, np. RWD/AWD."],
+  m: ["Miejsca", "Liczba miejsc siedzących.\nZakres, np. 5–7, oznacza różne wersje lub konfiguracje."],
+  g: ["Bagażnik", "Pojemność bagażnika w litrach, w formacie „mniejsza–większa”:\nmniejsza – siedzenia rozłożone\nwiększa – po złożeniu tylnej kanapy\nPojedyncza liczba – jedna wartość.\nFiltr i sortowanie liczą po dolnej wartości."],
+  k: ["Bateria", "Pojemność akumulatora w kWh.\nIm większa, tym większy potencjalny zasięg, ale zwykle też wyższa cena i dłuższe ładowanie.\nZakres – różne wersje."],
+  r: ["Zasięg WLTP", "Zasięg w kilometrach wg normy WLTP.\nW codziennej jeździe bywa krótszy, zwłaszcza zimą i przy dużych prędkościach.\nZakres – różne wersje modelu."],
+  a: ["MAX AC", "Największa moc ładowania prądem zmiennym (AC) w kW.\nTak ładujesz w domu (wallbox) lub przy zwykłych słupkach.\nOgranicza ją ładowarka pokładowa auta."],
+  q: ["MAX DC", "Największa moc szybkiego ładowania prądem stałym (DC) w kW.\nTak ładujesz na szybkich stacjach przy trasach.\nIm więcej, tym krótszy postój."],
+  h: ["Moc", "Moc maksymalna układu napędowego w koniach mechanicznych (KM).\nZakres – różne wersje modelu."]
+};
 const STEPS = { c: 1000, z: 1000, l: 100, r: 10, h: 10, g: 10 };
 function stepOf(k) { return STEPS[k] || 1; }
 function bounds(c) {
@@ -617,13 +650,14 @@ function buildHead() {
   const r1 = COLS.map((c, i) => {
     const sortable = c.type !== "nr";
     const cls = (c.type === "num" ? "num" : "") + cellClass(i);
-    if (!sortable) return `<th class="${cls}" scope="col"><div class="sortbtn" style="cursor:default">${esc(c.t)}</div></th>`;
+    const tipBtn = TIPS[c.k] ? `<button type="button" class="info colinfo" data-tip="${c.k}" aria-label="Opis kolumny: ${esc(c.t)}">i</button>` : "";
+    if (!sortable) return `<th class="${cls}" scope="col"><div class="sortbtn" style="cursor:default">${esc(c.t)}</div>${tipBtn}</th>`;
     const unit = c.u ? `<br><span class="unit">${esc(c.u)}</span>` : "";
-    return `<th class="${cls}" scope="col" data-k="${c.k}" aria-sort="none"><button type="button" class="sortbtn" data-sort="${c.k}"><span>${esc(c.t)}${unit}</span><span class="arrow">↕</span></button></th>`;
+    return `<th class="${cls}" scope="col" data-k="${c.k}" aria-sort="none"><button type="button" class="sortbtn" data-sort="${c.k}"><span>${esc(c.t)}${unit}</span><span class="arrow">↕</span></button>${tipBtn}</th>`;
   }).join("");
   const r2 = COLS.map((c, i) => {
     const cls = (c.type === "num" ? "num" : "") + cellClass(i);
-    if (c.type === "nr") return `<th class="${cls}"></th>`;
+    if (c.type === "nr") return `<th class="${cls}"><div class="lpcnt" aria-live="polite" title="Liczba wyświetlonych modeli"><b id="lpShown">0</b></div></th>`;
     if (MULTI.includes(c.k)) return `<th class="${cls}"><div class="msw"><button type="button" class="msbtn" data-ms="${c.k}" aria-haspopup="true" aria-expanded="false" aria-label="Filtr: ${esc(c.t)}" title="Wybierz wartości"><span class="mslabel"></span><span class="arrow">▾</span></button><button type="button" class="msx" data-msx="${c.k}" aria-label="Wyczyść filtr: ${esc(c.t)}" title="Wyczyść filtr">×</button></div></th>`;
     if (c.type === "text") return `<th class="${cls}"><input type="search" id="f-${c.k}" data-ft="${c.k}" placeholder="szukaj" aria-label="Filtr: ${esc(c.t)}"></th>`;
     return `<th class="${cls}"><div class="rng"><label><span>od</span><input type="number" step="${stepOf(c.k)}" inputmode="decimal" id="f-${c.k}-min" data-fn="${c.k}" data-b="min" data-raw="${bounds(c).rmin}" placeholder="${bounds(c).min}" title="od (min w kolumnie)" aria-label="${esc(c.t)} od"></label><label><span>do</span><input type="number" step="${stepOf(c.k)}" inputmode="decimal" id="f-${c.k}-max" data-fn="${c.k}" data-b="max" data-raw="${bounds(c).rmax}" placeholder="${bounds(c).max}" title="do (max w kolumnie)" aria-label="${esc(c.t)} do"></label></div></th>`;
@@ -663,18 +697,23 @@ function render() {
   const rows = visible();
   const tb = document.getElementById("tbody");
   if (!rows.length) {
-    tb.innerHTML = `<tr><td colspan="${COLS.length}" class="none">Brak pojazdów dla tych filtrów.</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="${COLS.length}" class="none">Brak pojazdów dla podanych warunków filtrowania.</td></tr>`;
   } else {
     tb.innerHTML = rows.map((r, n) => {
       const tds = COLS.map((c, i) => {
         const pc = cellClass(i);
         if (c.k === "nr") return `<td class="num${pc}">${n + 1}</td>`;
-        if (c.k === "brand") return `<td class="brandcell${pc}">${esc(r.brand)}</td>`;
+        if (c.k === "brand") {
+          const u = BRAND_URL[r.brand];
+          const web = u ? '<a class="cam" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer" title="Strona marki: ' + esc(r.brand) + '" aria-label="Strona marki: ' + esc(r.brand) + '"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.9 5.6 3.9 9s-1.3 6.4-3.9 9c-2.6-2.6-3.9-5.6-3.9-9S9.4 5.6 12 3z"/></svg></a>' : '';
+          return `<td class="brandcell${pc}"><div class="mcell"><span class="mname">${esc(r.brand)}</span>${web}</div></td>`;
+        }
         if (c.k === "model") {
           const clean = r.model.replace(/\*$/, "");
           const url = "https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(r.brand + " " + clean);
-          const name = '<a href="' + url + '" target="_blank" rel="noopener noreferrer" title="Zdjęcia: ' + esc(r.brand + " " + clean) + ' (Grafika Google)">' + esc(clean) + '</a>' + (r.soon ? '<button type="button" class="info" aria-label="Zamówienia otwarte lub premiera wkrótce" title="Zamówienia otwarte lub premiera wkrótce">i</button>' : '');
-          return `<td class="model${pc}">${name}</td>`;
+          const info = r.soon ? '<button type="button" class="info" aria-label="Zamówienia otwarte lub premiera wkrótce" title="Zamówienia otwarte lub premiera wkrótce">i</button>' : '';
+          const cam = '<a class="cam" href="' + url + '" target="_blank" rel="noopener noreferrer" title="Zdjęcia: ' + esc(r.brand + " " + clean) + ' (Grafika Google)" aria-label="Zdjęcia: ' + esc(r.brand + " " + clean) + '"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l1.6-2.2h6.8L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/></svg></a>';
+          return `<td class="model${pc}"><div class="mcell"><span class="mname">${esc(clean)}${info}</span>${cam}</div></td>`;
         }
         if (c.k === "kraj") return r.kraj ? `<td title="${esc(r.krajN)}">${esc(r.kraj)}</td>` : `<td class="empty">—</td>`;
         if (c.k === "p") return r.pd ? `<td>${esc(r.pd)}</td>` : `<td class="empty">—</td>`;
@@ -687,6 +726,7 @@ function render() {
     }).join("");
   }
   document.getElementById("cnt").textContent = rows.length;
+  document.getElementById("lpShown").textContent = rows.length;
   document.getElementById("cntBrands").textContent = new Set(rows.map(r => r.brand)).size;
   document.querySelectorAll("#thead th[data-k]").forEach(th => {
     const k = th.dataset.k;
@@ -728,14 +768,14 @@ function headWidth(c) {
   }
   return Math.ceil(w);
 }
-const MINW = { p: 86, d: 112 };
+const MINW = { p: 104, d: 112 };
 function layout() {
   const widths = COLS.map((c, i) => {
     let font = BODY_FONT, w = 0;
     const test = t => { w = Math.max(w, measure(font, t, 0)); };
     if (c.k === "nr") test(String(ROWS.length));
-    else if (c.k === "brand") { font = '600 14.5px "Barlow Semi Condensed", "Barlow", system-ui, sans-serif'; ROWS.forEach(r => test(r.brand)); }
-    else if (c.k === "model") { font = '600 14px "Barlow", system-ui, sans-serif'; ROWS.forEach(r => test(r.model)); }
+    else if (c.k === "brand") { font = '600 14.5px "Barlow Semi Condensed", "Barlow", system-ui, sans-serif'; ROWS.forEach(r => test(r.brand)); w += 26; }
+    else if (c.k === "model") { font = '600 14px "Barlow", system-ui, sans-serif'; ROWS.forEach(r => test(r.model)); w += 26; }
     else if (c.k === "d") ROWS.forEach(r => {
       const v = r.d; if (!v) return;
       const parts = v.split("/");
@@ -953,6 +993,30 @@ document.getElementById("reset").addEventListener("click", () => {
   document.querySelectorAll("#thead input").forEach(i => { i.value = ""; });
   render();
 });
+/* ---- opisy kolumn (dymki przy ikonie i) ---- */
+const tipEl = document.createElement("div");
+tipEl.id = "tip"; tipEl.setAttribute("role", "tooltip"); tipEl.hidden = true;
+document.body.appendChild(tipEl);
+let tipFor = null;
+function tipShow(btn) {
+  const t = TIPS[btn.dataset.tip]; if (!t) return;
+  tipEl.innerHTML = "<b>" + esc(t[0]) + "</b>" + esc(t[1]);
+  tipEl.hidden = false; tipFor = btn;
+  const r = btn.getBoundingClientRect(), w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+  let x = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), window.innerWidth - w - 8);
+  let y = r.bottom + 8; if (y + h > window.innerHeight - 8) y = Math.max(8, r.top - h - 8);
+  tipEl.style.left = x + "px"; tipEl.style.top = y + "px";
+}
+function tipHide() { tipEl.hidden = true; tipFor = null; }
+const thd = document.getElementById("thead");
+thd.addEventListener("mouseover", e => { const b = e.target.closest(".colinfo"); if (b) tipShow(b); });
+thd.addEventListener("mouseout", e => { if (e.target.closest(".colinfo")) tipHide(); });
+thd.addEventListener("focusin", e => { const b = e.target.closest(".colinfo"); if (b) tipShow(b); });
+thd.addEventListener("focusout", e => { if (e.target.closest(".colinfo")) tipHide(); });
+thd.addEventListener("click", e => { const b = e.target.closest(".colinfo"); if (b) { e.stopPropagation(); tipFor === b ? tipHide() : tipShow(b); } });
+document.addEventListener("keydown", e => { if (e.key === "Escape") tipHide(); });
+window.addEventListener("scroll", tipHide, { passive: true });
+document.addEventListener("click", e => { if (!e.target.closest(".colinfo")) tipHide(); });
 loadState();
 render();
 </script>
